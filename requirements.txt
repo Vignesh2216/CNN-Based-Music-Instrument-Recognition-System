@@ -1,8 +1,7 @@
-streamlit==1.32.0
-tensorflow==2.12.0
-librosa==0.10.1
+streamlit
+tensorflow
+librosa
 matplotlib
 pillow
 numpy
 gdown
-reportlab
