@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import json
 import os
-import gdown
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
 from reportlab.lib.pagesizes import letter
@@ -63,17 +62,10 @@ label_map = {
 labels = list(label_map.keys())
 
 # ---------------- MODEL SETUP ----------------
-MODEL_DIR = "model"
-MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
-
-FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
-MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+MODEL_PATH = "instrunet_cnn.keras"
 
 @st.cache_resource
 def load_model():
-    if not os.path.exists(MODEL_PATH):
-        os.makedirs(MODEL_DIR, exist_ok=True)
-        gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 model = load_model()
