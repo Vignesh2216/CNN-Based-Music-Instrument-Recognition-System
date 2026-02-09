@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import json
 import os
+import gdown
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
 from reportlab.lib.pagesizes import letter
@@ -61,11 +62,18 @@ label_map = {
 
 labels = list(label_map.keys())
 
-# ---------------- MODEL SETUP ----------------
-MODEL_PATH = "instrunet_cnn.keras"
+# ---------------- MODEL DOWNLOAD ----------------
+MODEL_DIR = "model"
+MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
+
+FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
+MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
 @st.cache_resource
 def load_model():
+    if not os.path.exists(MODEL_PATH):
+        os.makedirs(MODEL_DIR, exist_ok=True)
+        gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
 
 model = load_model()
@@ -152,14 +160,10 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     elements.append(Spacer(1, 15))
 
     if os.path.exists(waveform_path):
-        elements.append(Paragraph("<b>Audio Waveform:</b>", styles["Heading2"]))
-        elements.append(Spacer(1, 10))
         elements.append(RLImage(waveform_path, width=400, height=150))
         elements.append(Spacer(1, 15))
 
     if os.path.exists(confidence_path):
-        elements.append(Paragraph("<b>Confidence Scores:</b>", styles["Heading2"]))
-        elements.append(Spacer(1, 10))
         elements.append(RLImage(confidence_path, width=400, height=200))
 
     doc.build(elements)
@@ -207,9 +211,7 @@ if uploaded_file is not None:
 
     confidence_path = create_confidence_graph(chart_data)
 
-    # ---------------- INTENSITY TEXT ----------------
     intensity_text = generate_intensity_text(chart_data)
-
     st.subheader("Instrument Intensity")
     st.code(intensity_text)
 
