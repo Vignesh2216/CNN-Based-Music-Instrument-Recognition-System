@@ -1,6 +1,7 @@
-streamlit
+streamlit==1.32.0
 tensorflow==2.15.0
-librosa
-matplotlib
-Pillow
-reportlab
+librosa==0.10.1
+matplotlib==3.8.2
+Pillow==10.2.0
+reportlab==4.1.0
+numpy==1.26.4
