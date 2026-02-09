@@ -165,4 +165,4 @@ This project is for educational and demonstration purposes.
 
 
 
-link = https://cnn-based-music-instrument-recognition-system-hw7gyelngwxnt5c7.streamlit.app/
+link = https://cnn-based-music-instrument-recognition-system-vignesh-221.streamlit.app/
