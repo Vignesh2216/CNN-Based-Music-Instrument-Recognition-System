@@ -8,8 +8,13 @@ from PIL import Image
 import json
 import os
 import gdown
-
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
+from reportlab.platypus import (
+    SimpleDocTemplate,
+    Paragraph,
+    Spacer,
+    Image as RLImage,
+    Preformatted,
+)
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 
@@ -17,8 +22,9 @@ from reportlab.lib.styles import getSampleStyleSheet
 st.set_page_config(page_title="InstruNet AI", layout="centered")
 
 # ---------------- CUSTOM UI ----------------
-st.markdown("""
-<style>
+st.markdown(
+    """
+    <style>
     .main-title {
         font-size: 38px;
         font-weight: 800;
@@ -42,14 +48,16 @@ st.markdown("""
         margin-top: 25px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.45);
     }
-</style>
-""", unsafe_allow_html=True)
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------------- HEADER ----------------
 st.markdown('<div class="main-title">InstruNet AI</div>', unsafe_allow_html=True)
 st.markdown(
     '<div class="subtitle">Automatic Musical Instrument Detection from Audio</div>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 # ---------------- LABELS + ICONS ----------------
@@ -57,17 +65,16 @@ label_map = {
     "pia": ("Piano", "🎹"),
     "gac": ("Acoustic Guitar", "🎸"),
     "gel": ("Electric Guitar", "⚡🎸"),
-    "vio": ("Violin", "🎻")
+    "vio": ("Violin", "🎻"),
 }
-
 labels = list(label_map.keys())
 
-# ---------------- MODEL DOWNLOAD ----------------
+# ---------------- MODEL SETUP ----------------
 MODEL_DIR = "model"
 MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
-
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
 MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+
 
 @st.cache_resource
 def load_model():
@@ -75,6 +82,7 @@ def load_model():
         os.makedirs(MODEL_DIR, exist_ok=True)
         gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
+
 
 model = load_model()
 
@@ -87,7 +95,7 @@ def audio_to_spectrogram(audio_path, img_size=224):
         sr=sr,
         n_mels=128,
         n_fft=4096,
-        hop_length=256
+        hop_length=256,
     )
 
     mel_db = librosa.power_to_db(mel, ref=np.max)
@@ -104,6 +112,7 @@ def audio_to_spectrogram(audio_path, img_size=224):
 
     return np.expand_dims(img, axis=0)
 
+
 # ---------------- INTENSITY TEXT ----------------
 def generate_intensity_text(scores):
     text = "Instrument Intensity:\n"
@@ -111,6 +120,7 @@ def generate_intensity_text(scores):
         bars = "|" * int(val * 20)
         text += f"{inst}: {bars}\n"
     return text
+
 
 # ---------------- WAVEFORM IMAGE ----------------
 def create_waveform_image(audio_path):
@@ -124,6 +134,7 @@ def create_waveform_image(audio_path):
     plt.close()
 
     return "waveform.png"
+
 
 # ---------------- CONFIDENCE GRAPH ----------------
 def create_confidence_graph(scores):
@@ -140,6 +151,7 @@ def create_confidence_graph(scores):
 
     return "confidence.png"
 
+
 # ---------------- PDF GENERATION ----------------
 def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     pdf_path = "report.pdf"
@@ -149,34 +161,46 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
 
     elements.append(Paragraph("InstruNet AI Report", styles["Title"]))
     elements.append(Spacer(1, 15))
+    elements.append(
+        Paragraph(f"<b>Audio File:</b> {result['audio_file']}", styles["Normal"])
+    )
+    elements.append(
+        Paragraph(
+            f"<b>Detected Instrument:</b> {result['detected_instrument']}",
+            styles["Normal"],
+        )
+    )
+    elements.append(
+        Paragraph(f"<b>Confidence:</b> {result['confidence']:.2f}", styles["Normal"])
+    )
 
-    elements.append(Paragraph(f"<b>Audio File:</b> {result['audio_file']}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Detected Instrument:</b> {result['detected_instrument']}", styles["Normal"]))
-    elements.append(Paragraph(f"<b>Confidence:</b> {result['confidence']:.2f}", styles["Normal"]))
     elements.append(Spacer(1, 10))
-
     elements.append(Paragraph("<b>Instrument Intensity:</b>", styles["Heading2"]))
     elements.append(Preformatted(intensity_text, styles["Code"]))
     elements.append(Spacer(1, 15))
 
     if os.path.exists(waveform_path):
+        elements.append(Paragraph("<b>Audio Waveform:</b>", styles["Heading2"]))
+        elements.append(Spacer(1, 10))
         elements.append(RLImage(waveform_path, width=400, height=150))
         elements.append(Spacer(1, 15))
 
     if os.path.exists(confidence_path):
+        elements.append(Paragraph("<b>Confidence Scores:</b>", styles["Heading2"]))
+        elements.append(Spacer(1, 10))
         elements.append(RLImage(confidence_path, width=400, height=200))
 
     doc.build(elements)
     return pdf_path
 
+
 # ---------------- FILE UPLOAD ----------------
 uploaded_file = st.file_uploader(
     "Choose a .wav or .mp3 file",
-    type=["wav", "mp3"]
+    type=["wav", "mp3"],
 )
 
 if uploaded_file is not None:
-
     with open("input_audio.wav", "wb") as f:
         f.write(uploaded_file.read())
 
@@ -186,11 +210,11 @@ if uploaded_file is not None:
         X_test = audio_to_spectrogram("input_audio.wav")
         pred = model.predict(X_test)[0]
 
-    detected_code = labels[np.argmax(pred)]
-    detected_name, icon = label_map[detected_code]
-    confidence = float(np.max(pred))
+        detected_code = labels[np.argmax(pred)]
+        detected_name, icon = label_map[detected_code]
+        confidence = float(np.max(pred))
 
-    waveform_path = create_waveform_image("input_audio.wav")
+        waveform_path = create_waveform_image("input_audio.wav")
 
     st.subheader("Audio Visualization")
     st.image(waveform_path, use_container_width=True)
@@ -198,19 +222,19 @@ if uploaded_file is not None:
     st.markdown(
         f'<div class="result-card">'
         f'{icon} Detected Instrument: {detected_name} ({confidence:.2f})'
-        f'</div>',
-        unsafe_allow_html=True
+        f"</div>",
+        unsafe_allow_html=True,
     )
 
     st.subheader("Confidence Scores")
     chart_data = {
-        label_map[labels[i]][0]: float(pred[i])
-        for i in range(len(pred))
+        label_map[labels[i]][0]: float(pred[i]) for i in range(len(pred))
     }
     st.bar_chart(chart_data)
 
     confidence_path = create_confidence_graph(chart_data)
 
+    # ---------------- INTENSITY TEXT ----------------
     intensity_text = generate_intensity_text(chart_data)
     st.subheader("Instrument Intensity")
     st.code(intensity_text)
@@ -219,7 +243,7 @@ if uploaded_file is not None:
         "audio_file": uploaded_file.name,
         "detected_instrument": detected_name,
         "confidence": confidence,
-        "scores": chart_data
+        "scores": chart_data,
     }
 
     json_str = json.dumps(result, indent=4)
@@ -233,10 +257,15 @@ if uploaded_file is not None:
             json_str,
             file_name="prediction.json",
             mime="application/json",
-            use_container_width=True
+            use_container_width=True,
         )
 
-    pdf_path = generate_pdf(result, waveform_path, confidence_path, intensity_text)
+    pdf_path = generate_pdf(
+        result,
+        waveform_path,
+        confidence_path,
+        intensity_text,
+    )
 
     with open(pdf_path, "rb") as f:
         with col2:
@@ -245,5 +274,5 @@ if uploaded_file is not None:
                 f,
                 file_name="prediction.pdf",
                 mime="application/pdf",
-                use_container_width=True
+                use_container_width=True,
             )
