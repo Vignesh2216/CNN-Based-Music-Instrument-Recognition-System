@@ -88,7 +88,7 @@ st.markdown(
         border-radius: 2px;
     }
     
-    /* Upload Section - Light Gray with Professional Border */
+    /* Upload Section - Professional Style */
     .upload-section {
         background: #f7fafc;
         border-radius: 20px;
@@ -115,6 +115,7 @@ st.markdown(
         font-size: 32px;
         font-weight: 800;
         margin-top: 30px;
+        margin-bottom: 30px;
         box-shadow: 0 20px 40px -15px rgba(30, 60, 114, 0.4);
         transition: all 0.3s ease;
         animation: slideInUp 0.5s ease-out;
@@ -536,115 +537,116 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
 
 
 # ---------------- MAIN CONTAINER ----------------
-with st.container():
-    st.markdown('<div class="main-container">', unsafe_allow_html=True)
-    
-    # ---------------- FILE UPLOAD ----------------
-    st.markdown('<div class="upload-section">', unsafe_allow_html=True)
-    uploaded_file = st.file_uploader(
-        "🎵 Choose your audio file (WAV or MP3)",
-        type=["wav", "mp3"],
-        help="Upload a clear recording of a musical instrument for best results"
-    )
+# Start main container
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
+
+# Upload Section (Single White Box)
+st.markdown('<div class="upload-section">', unsafe_allow_html=True)
+uploaded_file = st.file_uploader(
+    "🎵 Choose your audio file (WAV or MP3)",
+    type=["wav", "mp3"],
+    help="Upload a clear recording of a musical instrument for best results"
+)
+st.markdown('</div>', unsafe_allow_html=True)
+
+if uploaded_file is not None:
+    with open("input_audio.wav", "wb") as f:
+        f.write(uploaded_file.read())
+
+    # Create columns for audio player
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.markdown("### 🎧 Audio Preview")
+        st.audio("input_audio.wav")
+
+    with st.spinner("🎵 Analyzing your audio with InstruNet AI..."):
+        X_test = audio_to_spectrogram("input_audio.wav")
+        pred = model.predict(X_test)[0]
+
+        detected_code = labels[np.argmax(pred)]
+        detected_name, icon = label_map[detected_code]
+        confidence = float(np.max(pred))
+
+        waveform_path = create_waveform_image("input_audio.wav")
+
+    # Waveform Visualization
+    st.markdown("### 📊 Audio Analysis")
+    st.markdown('<div class="waveform-container">', unsafe_allow_html=True)
+    st.image(waveform_path, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    if uploaded_file is not None:
-        with open("input_audio.wav", "wb") as f:
-            f.write(uploaded_file.read())
+    # Result Card
+    st.markdown(
+        f'<div class="result-card">'
+        f'{icon} {detected_name}<br>'
+        f'<span style="font-size: 18px;">Confidence: {confidence:.1%}</span>'
+        f"</div>",
+        unsafe_allow_html=True,
+    )
 
-        # Create columns for audio player
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            st.markdown("### 🎧 Audio Preview")
-            st.audio("input_audio.wav")
+    # Confidence Scores
+    st.markdown("### 📈 Confidence Analysis")
+    chart_data = {
+        label_map[labels[i]][0]: float(pred[i]) for i in range(len(pred))
+    }
+    st.bar_chart(chart_data)
 
-        with st.spinner("🎵 Analyzing your audio with InstruNet AI..."):
-            X_test = audio_to_spectrogram("input_audio.wav")
-            pred = model.predict(X_test)[0]
+    confidence_path = create_confidence_graph(chart_data)
+    st.image(confidence_path, use_container_width=True)
 
-            detected_code = labels[np.argmax(pred)]
-            detected_name, icon = label_map[detected_code]
-            confidence = float(np.max(pred))
+    # Intensity Text
+    intensity_text = generate_intensity_text(chart_data)
+    st.markdown("### 🎯 Instrument Intensity")
+    st.code(intensity_text, language="")
 
-            waveform_path = create_waveform_image("input_audio.wav")
+    result = {
+        "audio_file": uploaded_file.name,
+        "detected_instrument": detected_name,
+        "confidence": confidence,
+        "scores": chart_data,
+    }
 
-        # Waveform Visualization
-        st.markdown("### 📊 Audio Analysis")
-        st.markdown('<div class="waveform-container">', unsafe_allow_html=True)
-        st.image(waveform_path, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    json_str = json.dumps(result, indent=4)
 
-        # Result Card
-        st.markdown(
-            f'<div class="result-card">'
-            f'{icon} {detected_name}<br>'
-            f'<span style="font-size: 18px;">Confidence: {confidence:.1%}</span>'
-            f"</div>",
-            unsafe_allow_html=True,
+    # Download Section
+    st.markdown("### 📥 Download Reports")
+    st.markdown("Get detailed analysis reports in your preferred format")
+    
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.download_button(
+            "📄 Download JSON Report",
+            json_str,
+            file_name="prediction.json",
+            mime="application/json",
+            use_container_width=True,
         )
 
-        # Confidence Scores
-        st.markdown("### 📈 Confidence Analysis")
-        chart_data = {
-            label_map[labels[i]][0]: float(pred[i]) for i in range(len(pred))
-        }
-        st.bar_chart(chart_data)
+    pdf_path = generate_pdf(
+        result,
+        waveform_path,
+        confidence_path,
+        intensity_text,
+    )
 
-        confidence_path = create_confidence_graph(chart_data)
-        st.image(confidence_path, use_container_width=True)
-
-        # ---------------- INTENSITY TEXT ----------------
-        intensity_text = generate_intensity_text(chart_data)
-        st.markdown("### 🎯 Instrument Intensity")
-        st.code(intensity_text, language="")
-
-        result = {
-            "audio_file": uploaded_file.name,
-            "detected_instrument": detected_name,
-            "confidence": confidence,
-            "scores": chart_data,
-        }
-
-        json_str = json.dumps(result, indent=4)
-
-        # Download Section
-        st.markdown("### 📥 Download Reports")
-        st.markdown("Get detailed analysis reports in your preferred format")
-        
-        col1, col2 = st.columns(2)
-
-        with col1:
+    with open(pdf_path, "rb") as f:
+        with col2:
             st.download_button(
-                "📄 Download JSON Report",
-                json_str,
-                file_name="prediction.json",
-                mime="application/json",
+                "📑 Download PDF Report",
+                f,
+                file_name="prediction.pdf",
+                mime="application/pdf",
                 use_container_width=True,
             )
+    
+    # Success message
+    st.success("✅ Analysis complete! Your reports are ready for download.")
 
-        pdf_path = generate_pdf(
-            result,
-            waveform_path,
-            confidence_path,
-            intensity_text,
-        )
+# Close main container
+st.markdown('</div>', unsafe_allow_html=True)
 
-        with open(pdf_path, "rb") as f:
-            with col2:
-                st.download_button(
-                    "📑 Download PDF Report",
-                    f,
-                    file_name="prediction.pdf",
-                    mime="application/pdf",
-                    use_container_width=True,
-                )
-        
-        # Success message
-        st.success("✅ Analysis complete! Your reports are ready for download.")
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- FOOTER ----------------
+# Footer
 st.markdown("""
 <div class="footer">
     <p style="color: #718096;">InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
