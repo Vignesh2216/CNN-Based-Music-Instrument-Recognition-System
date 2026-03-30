@@ -508,8 +508,9 @@ if uploaded_file is not None:
     confidence_path = create_confidence_graph(chart_data)
     st.image(confidence_path, use_container_width=True)
 
-    # 🎯 Instrument Intensity (Dashboard Style)
+    # 🎯 Instrument Intensity (Dashboard Style + PDF text source)
     st.markdown("### 🎯 Instrument Intensity")
+    intensity_text = generate_intensity_text(chart_data)
 
     for inst, val in chart_data.items():
         st.progress(val, text=f"{inst} ({val:.2f})")
