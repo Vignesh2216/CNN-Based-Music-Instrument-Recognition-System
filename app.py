@@ -33,14 +33,14 @@ st.markdown(
     /* Import Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     
-    /* Global Styles */
+    /* Global Styles - Professional Dark Blue Gradient */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     }
     
-    /* Main Container */
+    /* Main Container - Clean White */
     .main-container {
-        background: white;
+        background: #ffffff;
         border-radius: 32px;
         padding: 2rem;
         margin: 1rem auto;
@@ -53,7 +53,7 @@ st.markdown(
         font-size: 56px;
         font-weight: 800;
         text-align: center;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -67,10 +67,10 @@ st.markdown(
         50% { background-position: 100% 50%; }
     }
     
-    /* Glowing Subtitle */
+    /* Subtitle */
     .subtitle {
         text-align: center;
-        color: #6b7280;
+        color: #4a5568;
         margin-bottom: 40px;
         font-size: 18px;
         font-weight: 500;
@@ -83,30 +83,31 @@ st.markdown(
         display: block;
         width: 100px;
         height: 3px;
-        background: linear-gradient(90deg, #667eea, #764ba2);
+        background: linear-gradient(90deg, #1e3c72, #2a5298);
         margin: 12px auto 0;
         border-radius: 2px;
     }
     
-    /* Upload Section */
+    /* Upload Section - Light Gray with Professional Border */
     .upload-section {
-        background: #f8f9fa;
-        border-radius: 24px;
+        background: #f7fafc;
+        border-radius: 20px;
         padding: 2rem;
         margin-bottom: 2rem;
-        border: 2px dashed #667eea;
+        border: 1px solid #e2e8f0;
         transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     
     .upload-section:hover {
-        border-color: #764ba2;
+        border-color: #2a5298;
         transform: translateY(-2px);
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
-    /* Result Card */
+    /* Result Card - Professional Gradient */
     .result-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
         padding: 32px;
         border-radius: 24px;
@@ -114,7 +115,7 @@ st.markdown(
         font-size: 32px;
         font-weight: 800;
         margin-top: 30px;
-        box-shadow: 0 20px 40px -15px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 20px 40px -15px rgba(30, 60, 114, 0.4);
         transition: all 0.3s ease;
         animation: slideInUp 0.5s ease-out;
         font-family: 'Inter', sans-serif;
@@ -122,7 +123,7 @@ st.markdown(
     
     .result-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 25px 50px -12px rgba(102, 126, 234, 0.6);
+        box-shadow: 0 25px 50px -12px rgba(30, 60, 114, 0.6);
     }
     
     @keyframes slideInUp {
@@ -138,19 +139,21 @@ st.markdown(
     
     /* Custom File Uploader Text */
     .stFileUploader label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
         font-weight: 600 !important;
+        font-size: 16px !important;
     }
     
     .stFileUploader {
         background: white;
-        border-radius: 16px;
+        border-radius: 12px;
         padding: 1rem;
+        border: 1px solid #e2e8f0;
     }
     
     /* Buttons */
     .stButton > button {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         color: white;
         border: none;
         border-radius: 12px;
@@ -163,86 +166,82 @@ st.markdown(
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.4);
+        box-shadow: 0 10px 20px -5px rgba(30, 60, 114, 0.4);
     }
     
     /* Audio Player */
     .stAudio {
-        border-radius: 16px;
+        border-radius: 12px;
         overflow: hidden;
         margin: 1rem 0;
     }
     
-    /* Headers - Improved Contrast */
+    /* Headers - Dark and Clear */
     h1, h2, h3, .stSubheader {
         font-family: 'Inter', sans-serif;
         font-weight: 700;
-        color: #111827 !important;
+        color: #1a202c !important;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
+        letter-spacing: -0.01em;
+    }
+    
+    h2 {
+        font-size: 28px !important;
+        border-left: 4px solid #2a5298;
+        padding-left: 16px;
+    }
+    
+    h3 {
+        font-size: 22px !important;
+        color: #2d3748 !important;
     }
     
     /* Regular Text */
     p, .stMarkdown, .stText {
-        color: #374151 !important;
+        color: #4a5568 !important;
         font-family: 'Inter', sans-serif;
+        line-height: 1.6;
     }
     
-    /* Code Block - Light background for better contrast */
+    /* Code Block - Professional Style */
     .stCodeBlock, pre {
-        background: #f3f4f6 !important;
+        background: #f1f5f9 !important;
         border-radius: 12px;
-        padding: 1rem;
-        border: 1px solid #e5e7eb;
-        color: #111827 !important;
+        padding: 1.25rem;
+        border: 1px solid #e2e8f0;
+        color: #1a202c !important;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
     }
     
     code {
-        color: #dc2626 !important;
-        background: #fee2e2 !important;
-        padding: 2px 6px;
+        color: #2a5298 !important;
+        background: #eef2ff !important;
+        padding: 2px 8px;
         border-radius: 6px;
+        font-weight: 500;
     }
     
-    /* Metrics */
-    .metric-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1rem;
-        text-align: center;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        transition: all 0.3s ease;
-        border: 1px solid #e5e7eb;
-    }
-    
-    .metric-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Custom Column Layout */
-    .stColumns {
-        gap: 1rem;
-    }
-    
-    /* Waveform Container */
+    /* Waveform Container - Clean White */
     .waveform-container {
-        background: #f9fafb;
+        background: #ffffff;
         border-radius: 16px;
         padding: 1rem;
         margin: 1rem 0;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     
     /* Footer */
     .footer {
         text-align: center;
         padding: 2rem;
-        color: #6b7280;
+        color: #718096;
         font-size: 12px;
         margin-top: 2rem;
-        border-top: 1px solid #e5e7eb;
-        background: white;
+        border-top: 1px solid #e2e8f0;
+        background: #ffffff;
         border-radius: 0 0 32px 32px;
     }
     
@@ -258,78 +257,98 @@ st.markdown(
     
     /* Success Message */
     .stSuccess {
-        background: #d1fae5 !important;
-        color: #065f46 !important;
+        background: #f0fdf4 !important;
+        color: #166534 !important;
         border-radius: 12px !important;
-        border-left: 4px solid #10b981 !important;
+        border-left: 4px solid #22c55e !important;
+        padding: 1rem !important;
     }
     
     /* Info/Warning Messages */
     .stInfo {
-        background: #dbeafe !important;
+        background: #eff6ff !important;
         color: #1e40af !important;
         border-radius: 12px !important;
+        border-left: 4px solid #3b82f6 !important;
     }
     
     /* Dataframe/Table */
     .stDataFrame {
         background: white;
         border-radius: 12px;
-        border: 1px solid #e5e7eb;
+        border: 1px solid #e2e8f0;
+    }
+    
+    /* Metric Cards */
+    [data-testid="stMetricValue"] {
+        color: #1e3c72 !important;
+        font-weight: 700 !important;
+    }
+    
+    [data-testid="stMetricLabel"] {
+        color: #4a5568 !important;
     }
     
     /* Slider/Labels */
     .stSlider label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
         font-weight: 500 !important;
     }
     
     /* Select Box */
     .stSelectbox label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
     }
     
     /* Radio Buttons */
     .stRadio label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
     }
     
     /* Checkbox */
     .stCheckbox label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
     }
     
     /* Number Input */
     .stNumberInput label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
     }
     
     /* Text Input */
     .stTextInput label {
-        color: #1f2937 !important;
+        color: #1a202c !important;
     }
     
     /* Expander */
     .streamlit-expanderHeader {
-        color: #1f2937 !important;
+        color: #1a202c !important;
         font-weight: 600 !important;
-        background: #f9fafb !important;
+        background: #f8fafc !important;
         border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
     }
     
     /* Tab Headers */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 4px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        color: #6b7280 !important;
+        color: #4a5568 !important;
         font-weight: 500 !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
     }
     
     .stTabs [aria-selected="true"] {
-        color: #667eea !important;
-        border-bottom-color: #667eea !important;
+        color: #2a5298 !important;
+        background: white !important;
+        border-bottom: none !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     /* Responsive Design */
@@ -345,6 +364,14 @@ st.markdown(
         
         .main-container {
             padding: 1rem;
+        }
+        
+        h2 {
+            font-size: 24px !important;
+        }
+        
+        h3 {
+            font-size: 20px !important;
         }
     }
     </style>
@@ -428,11 +455,11 @@ def create_waveform_image(audio_path):
 
     plt.figure(figsize=(8, 3))
     plt.style.use('default')
-    plt.plot(y, color='#667eea', alpha=0.8, linewidth=1)
-    plt.title("Audio Waveform Analysis", color='#111827', fontsize=14, fontweight='bold')
-    plt.xlabel("Time (seconds)", color='#374151')
-    plt.ylabel("Amplitude", color='#374151')
-    plt.grid(alpha=0.3, color='#9ca3af')
+    plt.plot(y, color='#2a5298', alpha=0.8, linewidth=1)
+    plt.title("Audio Waveform Analysis", color='#1a202c', fontsize=14, fontweight='bold')
+    plt.xlabel("Time (seconds)", color='#4a5568')
+    plt.ylabel("Amplitude", color='#4a5568')
+    plt.grid(alpha=0.3, color='#cbd5e0')
     plt.tight_layout()
     plt.savefig("waveform.png", facecolor='white', edgecolor='none', dpi=100)
     plt.close()
@@ -447,18 +474,18 @@ def create_confidence_graph(scores):
 
     plt.figure(figsize=(6, 3))
     plt.style.use('default')
-    colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+    colors = ['#1e3c72', '#2a5298', '#3b6cb0', '#4c7fc9']
     bars = plt.bar(names, values, color=colors, alpha=0.8)
-    plt.ylabel("Confidence Score", color='#374151', fontsize=12)
+    plt.ylabel("Confidence Score", color='#4a5568', fontsize=12)
     plt.ylim(0, 1)
-    plt.title("Instrument Detection Confidence", color='#111827', fontsize=14, fontweight='bold')
-    plt.grid(axis='y', alpha=0.3, color='#9ca3af')
+    plt.title("Instrument Detection Confidence", color='#1a202c', fontsize=14, fontweight='bold')
+    plt.grid(axis='y', alpha=0.3, color='#cbd5e0')
     plt.tight_layout()
     
     # Add value labels on bars
     for bar, val in zip(bars, values):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
-                f'{val:.2f}', ha='center', color='#111827', fontweight='bold')
+                f'{val:.2f}', ha='center', color='#1a202c', fontweight='bold')
     
     plt.savefig("confidence.png", facecolor='white', edgecolor='none', dpi=100)
     plt.close()
@@ -620,7 +647,7 @@ with st.container():
 # ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
-    <p style="color: #6b7280;">InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
-    <p style="color: #9ca3af; font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
+    <p style="color: #718096;">InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
+    <p style="color: #a0aec0; font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
 </div>
 """, unsafe_allow_html=True)
