@@ -38,13 +38,10 @@ st.markdown(
         background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
     }
     
-    /* Main Container - Clean White */
-    .main-container {
-        background: #ffffff;
-        border-radius: 32px;
-        padding: 2rem;
-        margin: 1rem auto;
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    /* Remove default padding/margin */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
         max-width: 1200px;
     }
     
@@ -70,7 +67,7 @@ st.markdown(
     /* Subtitle */
     .subtitle {
         text-align: center;
-        color: #4a5568;
+        color: #e2e8f0;
         margin-bottom: 40px;
         font-size: 18px;
         font-weight: 500;
@@ -88,21 +85,20 @@ st.markdown(
         border-radius: 2px;
     }
     
-    /* Upload Section - Professional Style */
+    /* Upload Section - Main White Box */
     .upload-section {
-        background: #f7fafc;
-        border-radius: 20px;
+        background: #ffffff;
+        border-radius: 24px;
         padding: 2rem;
         margin-bottom: 2rem;
         border: 1px solid #e2e8f0;
         transition: all 0.3s ease;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
     .upload-section:hover {
-        border-color: #2a5298;
         transform: translateY(-2px);
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
     }
     
     /* Result Card - Professional Gradient */
@@ -146,7 +142,7 @@ st.markdown(
     }
     
     .stFileUploader {
-        background: white;
+        background: #f7fafc;
         border-radius: 12px;
         padding: 1rem;
         border: 1px solid #e2e8f0;
@@ -177,11 +173,11 @@ st.markdown(
         margin: 1rem 0;
     }
     
-    /* Headers - Dark and Clear */
+    /* Headers - Light text for dark background */
     h1, h2, h3, .stSubheader {
         font-family: 'Inter', sans-serif;
         font-weight: 700;
-        color: #1a202c !important;
+        color: #f1f5f9 !important;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
         letter-spacing: -0.01em;
@@ -195,55 +191,53 @@ st.markdown(
     
     h3 {
         font-size: 22px !important;
-        color: #2d3748 !important;
+        color: #e2e8f0 !important;
     }
     
-    /* Regular Text */
+    /* Regular Text - Light for dark background */
     p, .stMarkdown, .stText {
-        color: #4a5568 !important;
+        color: #cbd5e0 !important;
         font-family: 'Inter', sans-serif;
         line-height: 1.6;
     }
     
     /* Code Block - Professional Style */
     .stCodeBlock, pre {
-        background: #f1f5f9 !important;
+        background: #1e293b !important;
         border-radius: 12px;
         padding: 1.25rem;
-        border: 1px solid #e2e8f0;
-        color: #1a202c !important;
+        border: 1px solid #334155;
+        color: #e2e8f0 !important;
         font-family: 'Courier New', monospace;
         font-size: 14px;
     }
     
     code {
-        color: #2a5298 !important;
-        background: #eef2ff !important;
+        color: #60a5fa !important;
+        background: #1e293b !important;
         padding: 2px 8px;
         border-radius: 6px;
         font-weight: 500;
     }
     
-    /* Waveform Container - Clean White */
+    /* Waveform Container - Semi-transparent */
     .waveform-container {
-        background: #ffffff;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
         border-radius: 16px;
         padding: 1rem;
         margin: 1rem 0;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     /* Footer */
     .footer {
         text-align: center;
         padding: 2rem;
-        color: #718096;
+        color: #94a3b8;
         font-size: 12px;
         margin-top: 2rem;
-        border-top: 1px solid #e2e8f0;
-        background: #ffffff;
-        border-radius: 0 0 32px 32px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
     }
     
     /* Loading Animation */
@@ -258,8 +252,8 @@ st.markdown(
     
     /* Success Message */
     .stSuccess {
-        background: #f0fdf4 !important;
-        color: #166534 !important;
+        background: rgba(34, 197, 94, 0.1) !important;
+        color: #86efac !important;
         border-radius: 12px !important;
         border-left: 4px solid #22c55e !important;
         padding: 1rem !important;
@@ -267,89 +261,81 @@ st.markdown(
     
     /* Info/Warning Messages */
     .stInfo {
-        background: #eff6ff !important;
-        color: #1e40af !important;
+        background: rgba(59, 130, 246, 0.1) !important;
+        color: #93c5fd !important;
         border-radius: 12px !important;
         border-left: 4px solid #3b82f6 !important;
     }
     
-    /* Dataframe/Table */
-    .stDataFrame {
-        background: white;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-    }
-    
     /* Metric Cards */
     [data-testid="stMetricValue"] {
-        color: #1e3c72 !important;
+        color: #60a5fa !important;
         font-weight: 700 !important;
     }
     
     [data-testid="stMetricLabel"] {
-        color: #4a5568 !important;
+        color: #94a3b8 !important;
     }
     
     /* Slider/Labels */
     .stSlider label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
         font-weight: 500 !important;
     }
     
     /* Select Box */
     .stSelectbox label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
     }
     
     /* Radio Buttons */
     .stRadio label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
     }
     
     /* Checkbox */
     .stCheckbox label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
     }
     
     /* Number Input */
     .stNumberInput label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
     }
     
     /* Text Input */
     .stTextInput label {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
     }
     
     /* Expander */
     .streamlit-expanderHeader {
-        color: #1a202c !important;
+        color: #e2e8f0 !important;
         font-weight: 600 !important;
-        background: #f8fafc !important;
+        background: rgba(255, 255, 255, 0.05) !important;
         border-radius: 12px !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     
     /* Tab Headers */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 12px;
         padding: 4px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        color: #4a5568 !important;
+        color: #94a3b8 !important;
         font-weight: 500 !important;
         padding: 8px 16px !important;
         border-radius: 8px !important;
     }
     
     .stTabs [aria-selected="true"] {
-        color: #2a5298 !important;
-        background: white !important;
+        color: #60a5fa !important;
+        background: rgba(255, 255, 255, 0.1) !important;
         border-bottom: none !important;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     /* Responsive Design */
@@ -363,16 +349,16 @@ st.markdown(
             padding: 20px;
         }
         
-        .main-container {
-            padding: 1rem;
-        }
-        
         h2 {
             font-size: 24px !important;
         }
         
         h3 {
             font-size: 20px !important;
+        }
+        
+        .upload-section {
+            padding: 1.5rem;
         }
     }
     </style>
@@ -382,7 +368,7 @@ st.markdown(
 
 # ---------------- HEADER WITH ANIMATION ----------------
 st.markdown("""
-<div style="text-align: center; padding: 1rem 0;">
+<div style="text-align: center; padding: 1rem 0 2rem 0;">
     <div class="main-title">🎵 InstruNet AI</div>
     <div class="subtitle">Automatic Musical Instrument Detection from Audio</div>
 </div>
@@ -455,14 +441,14 @@ def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
     plt.figure(figsize=(8, 3))
-    plt.style.use('default')
-    plt.plot(y, color='#2a5298', alpha=0.8, linewidth=1)
-    plt.title("Audio Waveform Analysis", color='#1a202c', fontsize=14, fontweight='bold')
-    plt.xlabel("Time (seconds)", color='#4a5568')
-    plt.ylabel("Amplitude", color='#4a5568')
-    plt.grid(alpha=0.3, color='#cbd5e0')
+    plt.style.use('dark_background')
+    plt.plot(y, color='#60a5fa', alpha=0.8, linewidth=1)
+    plt.title("Audio Waveform Analysis", color='#e2e8f0', fontsize=14, fontweight='bold')
+    plt.xlabel("Time (seconds)", color='#94a3b8')
+    plt.ylabel("Amplitude", color='#94a3b8')
+    plt.grid(alpha=0.3, color='#334155')
     plt.tight_layout()
-    plt.savefig("waveform.png", facecolor='white', edgecolor='none', dpi=100)
+    plt.savefig("waveform.png", facecolor='#0f172a', edgecolor='none', dpi=100)
     plt.close()
 
     return "waveform.png"
@@ -474,21 +460,21 @@ def create_confidence_graph(scores):
     values = list(scores.values())
 
     plt.figure(figsize=(6, 3))
-    plt.style.use('default')
-    colors = ['#1e3c72', '#2a5298', '#3b6cb0', '#4c7fc9']
+    plt.style.use('dark_background')
+    colors = ['#60a5fa', '#818cf8', '#a78bfa', '#c084fc']
     bars = plt.bar(names, values, color=colors, alpha=0.8)
-    plt.ylabel("Confidence Score", color='#4a5568', fontsize=12)
+    plt.ylabel("Confidence Score", color='#94a3b8', fontsize=12)
     plt.ylim(0, 1)
-    plt.title("Instrument Detection Confidence", color='#1a202c', fontsize=14, fontweight='bold')
-    plt.grid(axis='y', alpha=0.3, color='#cbd5e0')
+    plt.title("Instrument Detection Confidence", color='#e2e8f0', fontsize=14, fontweight='bold')
+    plt.grid(axis='y', alpha=0.3, color='#334155')
     plt.tight_layout()
     
     # Add value labels on bars
     for bar, val in zip(bars, values):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
-                f'{val:.2f}', ha='center', color='#1a202c', fontweight='bold')
+                f'{val:.2f}', ha='center', color='#e2e8f0', fontweight='bold')
     
-    plt.savefig("confidence.png", facecolor='white', edgecolor='none', dpi=100)
+    plt.savefig("confidence.png", facecolor='#0f172a', edgecolor='none', dpi=100)
     plt.close()
 
     return "confidence.png"
@@ -536,11 +522,7 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     return pdf_path
 
 
-# ---------------- MAIN CONTAINER ----------------
-# Start main container
-st.markdown('<div class="main-container">', unsafe_allow_html=True)
-
-# Upload Section (Single White Box)
+# ---------------- UPLOAD SECTION (SINGLE WHITE BOX) ----------------
 st.markdown('<div class="upload-section">', unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
     "🎵 Choose your audio file (WAV or MP3)",
@@ -553,7 +535,7 @@ if uploaded_file is not None:
     with open("input_audio.wav", "wb") as f:
         f.write(uploaded_file.read())
 
-    # Create columns for audio player
+    # Audio Preview
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         st.markdown("### 🎧 Audio Preview")
@@ -643,13 +625,10 @@ if uploaded_file is not None:
     # Success message
     st.success("✅ Analysis complete! Your reports are ready for download.")
 
-# Close main container
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Footer
+# ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
-    <p style="color: #718096;">InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
-    <p style="color: #a0aec0; font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
+    <p>InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
+    <p style="font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
 </div>
 """, unsafe_allow_html=True)
