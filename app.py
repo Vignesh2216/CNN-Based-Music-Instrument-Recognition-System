@@ -40,12 +40,11 @@ st.markdown(
     
     /* Main Container */
     .main-container {
-        background: rgba(255, 255, 255, 0.95);
+        background: white;
         border-radius: 32px;
         padding: 2rem;
         margin: 1rem auto;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        backdrop-filter: blur(10px);
         max-width: 1200px;
     }
     
@@ -91,7 +90,7 @@ st.markdown(
     
     /* Upload Section */
     .upload-section {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        background: #f8f9fa;
         border-radius: 24px;
         padding: 2rem;
         margin-bottom: 2rem;
@@ -137,7 +136,12 @@ st.markdown(
         }
     }
     
-    /* Custom File Uploader */
+    /* Custom File Uploader Text */
+    .stFileUploader label {
+        color: #1f2937 !important;
+        font-weight: 600 !important;
+    }
+    
     .stFileUploader {
         background: white;
         border-radius: 16px;
@@ -169,20 +173,35 @@ st.markdown(
         margin: 1rem 0;
     }
     
-    /* Headers */
-    h2, h3, .stSubheader {
+    /* Headers - Improved Contrast */
+    h1, h2, h3, .stSubheader {
         font-family: 'Inter', sans-serif;
         font-weight: 700;
-        color: #1f2937;
+        color: #111827 !important;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
     }
     
-    /* Code Block */
-    .stCodeBlock {
-        background: #1f2937;
+    /* Regular Text */
+    p, .stMarkdown, .stText {
+        color: #374151 !important;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Code Block - Light background for better contrast */
+    .stCodeBlock, pre {
+        background: #f3f4f6 !important;
         border-radius: 12px;
         padding: 1rem;
+        border: 1px solid #e5e7eb;
+        color: #111827 !important;
+    }
+    
+    code {
+        color: #dc2626 !important;
+        background: #fee2e2 !important;
+        padding: 2px 6px;
+        border-radius: 6px;
     }
     
     /* Metrics */
@@ -193,6 +212,7 @@ st.markdown(
         text-align: center;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         transition: all 0.3s ease;
+        border: 1px solid #e5e7eb;
     }
     
     .metric-card:hover {
@@ -207,10 +227,11 @@ st.markdown(
     
     /* Waveform Container */
     .waveform-container {
-        background: #1f2937;
+        background: #f9fafb;
         border-radius: 16px;
         padding: 1rem;
         margin: 1rem 0;
+        border: 1px solid #e5e7eb;
     }
     
     /* Footer */
@@ -221,6 +242,8 @@ st.markdown(
         font-size: 12px;
         margin-top: 2rem;
         border-top: 1px solid #e5e7eb;
+        background: white;
+        border-radius: 0 0 32px 32px;
     }
     
     /* Loading Animation */
@@ -231,6 +254,82 @@ st.markdown(
     
     .stSpinner {
         animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    /* Success Message */
+    .stSuccess {
+        background: #d1fae5 !important;
+        color: #065f46 !important;
+        border-radius: 12px !important;
+        border-left: 4px solid #10b981 !important;
+    }
+    
+    /* Info/Warning Messages */
+    .stInfo {
+        background: #dbeafe !important;
+        color: #1e40af !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Dataframe/Table */
+    .stDataFrame {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    /* Slider/Labels */
+    .stSlider label {
+        color: #1f2937 !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Select Box */
+    .stSelectbox label {
+        color: #1f2937 !important;
+    }
+    
+    /* Radio Buttons */
+    .stRadio label {
+        color: #1f2937 !important;
+    }
+    
+    /* Checkbox */
+    .stCheckbox label {
+        color: #1f2937 !important;
+    }
+    
+    /* Number Input */
+    .stNumberInput label {
+        color: #1f2937 !important;
+    }
+    
+    /* Text Input */
+    .stTextInput label {
+        color: #1f2937 !important;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        color: #1f2937 !important;
+        font-weight: 600 !important;
+        background: #f9fafb !important;
+        border-radius: 12px !important;
+    }
+    
+    /* Tab Headers */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: #6b7280 !important;
+        font-weight: 500 !important;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        color: #667eea !important;
+        border-bottom-color: #667eea !important;
     }
     
     /* Responsive Design */
@@ -316,10 +415,10 @@ def audio_to_spectrogram(audio_path, img_size=224):
 
 # ---------------- INTENSITY TEXT ----------------
 def generate_intensity_text(scores):
-    text = "🎵 Instrument Intensity:\n"
+    text = "🎵 Instrument Intensity:\n\n"
     for inst, val in scores.items():
         bars = "█" * int(val * 20)
-        text += f"\n{inst}: {bars} {val:.2f}"
+        text += f"{inst:20} [{bars:<20}] {val:.2f}\n"
     return text
 
 
@@ -328,13 +427,14 @@ def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
     plt.figure(figsize=(8, 3))
-    plt.style.use('dark_background')
-    librosa.display.waveshow(y, sr=sr, color='#667eea', alpha=0.8)
-    plt.title("Audio Waveform Analysis", color='white', fontsize=14, fontweight='bold')
-    plt.xlabel("Time (seconds)", color='white')
-    plt.ylabel("Amplitude", color='white')
+    plt.style.use('default')
+    plt.plot(y, color='#667eea', alpha=0.8, linewidth=1)
+    plt.title("Audio Waveform Analysis", color='#111827', fontsize=14, fontweight='bold')
+    plt.xlabel("Time (seconds)", color='#374151')
+    plt.ylabel("Amplitude", color='#374151')
+    plt.grid(alpha=0.3, color='#9ca3af')
     plt.tight_layout()
-    plt.savefig("waveform.png", facecolor='#1f2937', edgecolor='none')
+    plt.savefig("waveform.png", facecolor='white', edgecolor='none', dpi=100)
     plt.close()
 
     return "waveform.png"
@@ -346,21 +446,21 @@ def create_confidence_graph(scores):
     values = list(scores.values())
 
     plt.figure(figsize=(6, 3))
-    plt.style.use('dark_background')
+    plt.style.use('default')
     colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe']
     bars = plt.bar(names, values, color=colors, alpha=0.8)
-    plt.ylabel("Confidence Score", color='white', fontsize=12)
+    plt.ylabel("Confidence Score", color='#374151', fontsize=12)
     plt.ylim(0, 1)
-    plt.title("Instrument Detection Confidence", color='white', fontsize=14, fontweight='bold')
-    plt.grid(axis='y', alpha=0.3)
+    plt.title("Instrument Detection Confidence", color='#111827', fontsize=14, fontweight='bold')
+    plt.grid(axis='y', alpha=0.3, color='#9ca3af')
     plt.tight_layout()
     
     # Add value labels on bars
     for bar, val in zip(bars, values):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
-                f'{val:.2f}', ha='center', color='white', fontweight='bold')
+                f'{val:.2f}', ha='center', color='#111827', fontweight='bold')
     
-    plt.savefig("confidence.png", facecolor='#1f2937', edgecolor='none')
+    plt.savefig("confidence.png", facecolor='white', edgecolor='none', dpi=100)
     plt.close()
 
     return "confidence.png"
@@ -520,7 +620,7 @@ with st.container():
 # ---------------- FOOTER ----------------
 st.markdown("""
 <div class="footer">
-    <p>InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
-    <p style="font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
+    <p style="color: #6b7280;">InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
+    <p style="color: #9ca3af; font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
 </div>
 """, unsafe_allow_html=True)
