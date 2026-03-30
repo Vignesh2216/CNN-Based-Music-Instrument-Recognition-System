@@ -19,46 +19,247 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
 
 # ---------------- PAGE CONFIG ----------------
-st.set_page_config(page_title="InstruNet AI", layout="centered")
+st.set_page_config(
+    page_title="InstruNet AI", 
+    layout="centered",
+    page_icon="🎵",
+    initial_sidebar_state="collapsed"
+)
 
 # ---------------- CUSTOM UI ----------------
 st.markdown(
     """
     <style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    
+    /* Global Styles */
+    .stApp {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    /* Main Container */
+    .main-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 32px;
+        padding: 2rem;
+        margin: 1rem auto;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        backdrop-filter: blur(10px);
+        max-width: 1200px;
+    }
+    
+    /* Animated Gradient Title */
     .main-title {
-        font-size: 38px;
+        font-size: 56px;
         font-weight: 800;
         text-align: center;
-        margin-bottom: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 8px;
+        animation: gradientShift 3s ease infinite;
+        font-family: 'Inter', sans-serif;
     }
+    
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    
+    /* Glowing Subtitle */
     .subtitle {
         text-align: center;
-        color: #9aa0a6;
-        margin-bottom: 30px;
-        font-size: 16px;
+        color: #6b7280;
+        margin-bottom: 40px;
+        font-size: 18px;
+        font-weight: 500;
+        font-family: 'Inter', sans-serif;
+        position: relative;
     }
+    
+    .subtitle::after {
+        content: '';
+        display: block;
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        margin: 12px auto 0;
+        border-radius: 2px;
+    }
+    
+    /* Upload Section */
+    .upload-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 24px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border: 2px dashed #667eea;
+        transition: all 0.3s ease;
+    }
+    
+    .upload-section:hover {
+        border-color: #764ba2;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Result Card */
     .result-card {
-        background: linear-gradient(135deg, #1f2937, #111827);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 22px;
-        border-radius: 16px;
+        padding: 32px;
+        border-radius: 24px;
         text-align: center;
-        font-size: 26px;
+        font-size: 32px;
+        font-weight: 800;
+        margin-top: 30px;
+        box-shadow: 0 20px 40px -15px rgba(102, 126, 234, 0.4);
+        transition: all 0.3s ease;
+        animation: slideInUp 0.5s ease-out;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 50px -12px rgba(102, 126, 234, 0.6);
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Custom File Uploader */
+    .stFileUploader {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem;
+    }
+    
+    /* Buttons */
+    .stButton > button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Audio Player */
+    .stAudio {
+        border-radius: 16px;
+        overflow: hidden;
+        margin: 1rem 0;
+    }
+    
+    /* Headers */
+    h2, h3, .stSubheader {
+        font-family: 'Inter', sans-serif;
         font-weight: 700;
-        margin-top: 25px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+        color: #1f2937;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    /* Code Block */
+    .stCodeBlock {
+        background: #1f2937;
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    
+    /* Metrics */
+    .metric-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Custom Column Layout */
+    .stColumns {
+        gap: 1rem;
+    }
+    
+    /* Waveform Container */
+    .waveform-container {
+        background: #1f2937;
+        border-radius: 16px;
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    /* Footer */
+    .footer {
+        text-align: center;
+        padding: 2rem;
+        color: #6b7280;
+        font-size: 12px;
+        margin-top: 2rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    
+    /* Loading Animation */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .stSpinner {
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-title {
+            font-size: 36px;
+        }
+        
+        .result-card {
+            font-size: 24px;
+            padding: 20px;
+        }
+        
+        .main-container {
+            padding: 1rem;
+        }
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# ---------------- HEADER ----------------
-st.markdown('<div class="main-title">InstruNet AI</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="subtitle">Automatic Musical Instrument Detection from Audio</div>',
-    unsafe_allow_html=True,
-)
+# ---------------- HEADER WITH ANIMATION ----------------
+st.markdown("""
+<div style="text-align: center; padding: 1rem 0;">
+    <div class="main-title">🎵 InstruNet AI</div>
+    <div class="subtitle">Automatic Musical Instrument Detection from Audio</div>
+</div>
+""", unsafe_allow_html=True)
 
 # ---------------- LABELS + ICONS ----------------
 label_map = {
@@ -115,10 +316,10 @@ def audio_to_spectrogram(audio_path, img_size=224):
 
 # ---------------- INTENSITY TEXT ----------------
 def generate_intensity_text(scores):
-    text = "Instrument Intensity:\n"
+    text = "🎵 Instrument Intensity:\n"
     for inst, val in scores.items():
-        bars = "|" * int(val * 20)
-        text += f"{inst}: {bars}\n"
+        bars = "█" * int(val * 20)
+        text += f"\n{inst}: {bars} {val:.2f}"
     return text
 
 
@@ -127,10 +328,13 @@ def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
     plt.figure(figsize=(8, 3))
-    librosa.display.waveshow(y, sr=sr, color="cyan")
-    plt.title("Audio Waveform")
+    plt.style.use('dark_background')
+    librosa.display.waveshow(y, sr=sr, color='#667eea', alpha=0.8)
+    plt.title("Audio Waveform Analysis", color='white', fontsize=14, fontweight='bold')
+    plt.xlabel("Time (seconds)", color='white')
+    plt.ylabel("Amplitude", color='white')
     plt.tight_layout()
-    plt.savefig("waveform.png")
+    plt.savefig("waveform.png", facecolor='#1f2937', edgecolor='none')
     plt.close()
 
     return "waveform.png"
@@ -142,11 +346,21 @@ def create_confidence_graph(scores):
     values = list(scores.values())
 
     plt.figure(figsize=(6, 3))
-    plt.bar(names, values)
-    plt.ylabel("Confidence")
+    plt.style.use('dark_background')
+    colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe']
+    bars = plt.bar(names, values, color=colors, alpha=0.8)
+    plt.ylabel("Confidence Score", color='white', fontsize=12)
     plt.ylim(0, 1)
+    plt.title("Instrument Detection Confidence", color='white', fontsize=14, fontweight='bold')
+    plt.grid(axis='y', alpha=0.3)
     plt.tight_layout()
-    plt.savefig("confidence.png")
+    
+    # Add value labels on bars
+    for bar, val in zip(bars, values):
+        plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.02, 
+                f'{val:.2f}', ha='center', color='white', fontweight='bold')
+    
+    plt.savefig("confidence.png", facecolor='#1f2937', edgecolor='none')
     plt.close()
 
     return "confidence.png"
@@ -194,85 +408,119 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     return pdf_path
 
 
-# ---------------- FILE UPLOAD ----------------
-uploaded_file = st.file_uploader(
-    "Choose a .wav or .mp3 file",
-    type=["wav", "mp3"],
-)
-
-if uploaded_file is not None:
-    with open("input_audio.wav", "wb") as f:
-        f.write(uploaded_file.read())
-
-    st.audio("input_audio.wav")
-
-    with st.spinner("Analyzing audio..."):
-        X_test = audio_to_spectrogram("input_audio.wav")
-        pred = model.predict(X_test)[0]
-
-        detected_code = labels[np.argmax(pred)]
-        detected_name, icon = label_map[detected_code]
-        confidence = float(np.max(pred))
-
-        waveform_path = create_waveform_image("input_audio.wav")
-
-    st.subheader("Audio Visualization")
-    st.image(waveform_path, use_container_width=True)
-
-    st.markdown(
-        f'<div class="result-card">'
-        f'{icon} Detected Instrument: {detected_name} ({confidence:.2f})'
-        f"</div>",
-        unsafe_allow_html=True,
+# ---------------- MAIN CONTAINER ----------------
+with st.container():
+    st.markdown('<div class="main-container">', unsafe_allow_html=True)
+    
+    # ---------------- FILE UPLOAD ----------------
+    st.markdown('<div class="upload-section">', unsafe_allow_html=True)
+    uploaded_file = st.file_uploader(
+        "🎵 Choose your audio file (WAV or MP3)",
+        type=["wav", "mp3"],
+        help="Upload a clear recording of a musical instrument for best results"
     )
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.subheader("Confidence Scores")
-    chart_data = {
-        label_map[labels[i]][0]: float(pred[i]) for i in range(len(pred))
-    }
-    st.bar_chart(chart_data)
+    if uploaded_file is not None:
+        with open("input_audio.wav", "wb") as f:
+            f.write(uploaded_file.read())
 
-    confidence_path = create_confidence_graph(chart_data)
+        # Create columns for audio player
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown("### 🎧 Audio Preview")
+            st.audio("input_audio.wav")
 
-    # ---------------- INTENSITY TEXT ----------------
-    intensity_text = generate_intensity_text(chart_data)
-    st.subheader("Instrument Intensity")
-    st.code(intensity_text)
+        with st.spinner("🎵 Analyzing your audio with InstruNet AI..."):
+            X_test = audio_to_spectrogram("input_audio.wav")
+            pred = model.predict(X_test)[0]
 
-    result = {
-        "audio_file": uploaded_file.name,
-        "detected_instrument": detected_name,
-        "confidence": confidence,
-        "scores": chart_data,
-    }
+            detected_code = labels[np.argmax(pred)]
+            detected_name, icon = label_map[detected_code]
+            confidence = float(np.max(pred))
 
-    json_str = json.dumps(result, indent=4)
+            waveform_path = create_waveform_image("input_audio.wav")
 
-    st.subheader("Download Report")
-    col1, col2 = st.columns(2)
+        # Waveform Visualization
+        st.markdown("### 📊 Audio Analysis")
+        st.markdown('<div class="waveform-container">', unsafe_allow_html=True)
+        st.image(waveform_path, use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    with col1:
-        st.download_button(
-            "Download JSON Report",
-            json_str,
-            file_name="prediction.json",
-            mime="application/json",
-            use_container_width=True,
+        # Result Card
+        st.markdown(
+            f'<div class="result-card">'
+            f'{icon} {detected_name}<br>'
+            f'<span style="font-size: 18px;">Confidence: {confidence:.1%}</span>'
+            f"</div>",
+            unsafe_allow_html=True,
         )
 
-    pdf_path = generate_pdf(
-        result,
-        waveform_path,
-        confidence_path,
-        intensity_text,
-    )
+        # Confidence Scores
+        st.markdown("### 📈 Confidence Analysis")
+        chart_data = {
+            label_map[labels[i]][0]: float(pred[i]) for i in range(len(pred))
+        }
+        st.bar_chart(chart_data)
 
-    with open(pdf_path, "rb") as f:
-        with col2:
+        confidence_path = create_confidence_graph(chart_data)
+        st.image(confidence_path, use_container_width=True)
+
+        # ---------------- INTENSITY TEXT ----------------
+        intensity_text = generate_intensity_text(chart_data)
+        st.markdown("### 🎯 Instrument Intensity")
+        st.code(intensity_text, language="")
+
+        result = {
+            "audio_file": uploaded_file.name,
+            "detected_instrument": detected_name,
+            "confidence": confidence,
+            "scores": chart_data,
+        }
+
+        json_str = json.dumps(result, indent=4)
+
+        # Download Section
+        st.markdown("### 📥 Download Reports")
+        st.markdown("Get detailed analysis reports in your preferred format")
+        
+        col1, col2 = st.columns(2)
+
+        with col1:
             st.download_button(
-                "Download PDF Report",
-                f,
-                file_name="prediction.pdf",
-                mime="application/pdf",
+                "📄 Download JSON Report",
+                json_str,
+                file_name="prediction.json",
+                mime="application/json",
                 use_container_width=True,
             )
+
+        pdf_path = generate_pdf(
+            result,
+            waveform_path,
+            confidence_path,
+            intensity_text,
+        )
+
+        with open(pdf_path, "rb") as f:
+            with col2:
+                st.download_button(
+                    "📑 Download PDF Report",
+                    f,
+                    file_name="prediction.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                )
+        
+        # Success message
+        st.success("✅ Analysis complete! Your reports are ready for download.")
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ---------------- FOOTER ----------------
+st.markdown("""
+<div class="footer">
+    <p>InstruNet AI - Powered by Deep Learning | Made with 🎵 for musicians and audio enthusiasts</p>
+    <p style="font-size: 10px;">Supports Piano, Acoustic Guitar, Electric Guitar, and Violin detection</p>
+</div>
+""", unsafe_allow_html=True)
