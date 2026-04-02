@@ -8,6 +8,9 @@ from PIL import Image
 import json
 import os
 import gdown
+import sqlite3
+import hashlib
+from datetime import datetime
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
 from reportlab.lib.pagesizes import letter
@@ -20,6 +23,81 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ---------------- DATABASE ----------------
+DB_PATH = "users.db"
+
+
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            full_name TEXT NOT NULL,
+            email TEXT NOT NULL UNIQUE,
+            password TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+
+def register_user(full_name, email, password):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO users (full_name, email, password, created_at) VALUES (?, ?, ?, ?)",
+            (full_name, email, hash_password(password), datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        )
+        conn.commit()
+        conn.close()
+        return True, "Registration successful. Please sign in."
+    except sqlite3.IntegrityError:
+        return False, "An account with this email already exists."
+    except Exception as e:
+        return False, f"Registration failed: {e}"
+
+
+def login_user(email, password):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, full_name, email FROM users WHERE email = ? AND password = ?",
+            (email, hash_password(password))
+        )
+        user = cursor.fetchone()
+        conn.close()
+
+        if user:
+            return True, {
+                "id": user[0],
+                "full_name": user[1],
+                "email": user[2]
+            }
+        return False, "Invalid email or password."
+    except Exception as e:
+        return False, f"Login failed: {e}"
+
+
+init_db()
+
+# ---------------- SESSION STATE ----------------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+if "auth_mode" not in st.session_state:
+    st.session_state.auth_mode = "landing"
 
 # ---------------- CUSTOM CSS ----------------
 st.markdown("""
@@ -224,39 +302,6 @@ st.markdown("""
         font-size: 0.9rem;
     }
 
-    div[data-testid="stFileUploader"] {
-        background: transparent !important;
-    }
-
-    div[data-testid="stFileUploader"] section {
-        background: transparent !important;
-        border: none !important;
-    }
-
-    .stButton>button, .stDownloadButton>button {
-        width: 100%;
-        border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.10);
-        background: linear-gradient(135deg, #2563eb, #4f46e5);
-        color: white;
-        font-weight: 700;
-        padding: 0.72rem 1rem;
-        box-shadow: 0 6px 18px rgba(37,99,235,0.25);
-    }
-
-    .stDownloadButton>button:hover, .stButton>button:hover {
-        border-color: rgba(255,255,255,0.20);
-        background: linear-gradient(135deg, #1d4ed8, #4338ca);
-        color: white;
-    }
-
-    div[data-testid="stAudio"] {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
-        border-radius: 16px;
-        padding: 10px 12px;
-    }
-
     .footer {
         margin-top: 32px;
         padding: 22px 24px;
@@ -282,8 +327,64 @@ st.markdown("""
         margin-top: 8px;
     }
 
-    h1, h2, h3, h4, h5, h6, p, label, div {
-        color: inherit;
+    .auth-wrapper {
+        max-width: 460px;
+        margin: 30px auto;
+    }
+
+    .auth-card {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+    }
+
+    .auth-title {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 6px;
+        text-align: center;
+    }
+
+    .auth-subtitle {
+        color: #cbd5e1;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    div[data-testid="stFileUploader"] {
+        background: transparent !important;
+    }
+
+    div[data-testid="stFileUploader"] section {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .stButton > button, .stDownloadButton > button {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.10);
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: white;
+        font-weight: 700;
+        padding: 0.72rem 1rem;
+        box-shadow: 0 6px 18px rgba(37,99,235,0.25);
+    }
+
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        border-color: rgba(255,255,255,0.20);
+        background: linear-gradient(135deg, #1d4ed8, #4338ca);
+        color: white;
+    }
+
+    div[data-testid="stAudio"] {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 10px 12px;
     }
 
     @media (max-width: 900px) {
@@ -297,72 +398,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-# ---------------- LANDING PAGE / HERO ----------------
-st.markdown("""
-<div class="hero-card">
-    <div class="hero-badge">AI-Powered Musical Instrument Recognition</div>
-    <div class="hero-title">InstruNet AI — Professional Audio Classification Dashboard</div>
-    <p class="hero-subtitle">
-        A modern deep learning application that identifies musical instruments from uploaded audio,
-        visualizes waveform patterns, analyzes confidence distribution, and generates exportable reports.
-        Designed for clean interaction, fast analysis, and professional presentation.
-    </p>
-    <div class="info-chip-wrap">
-        <div class="info-chip">🎵 Audio Classification</div>
-        <div class="info-chip">📊 Confidence Analysis</div>
-        <div class="info-chip">📈 Waveform Visualization</div>
-        <div class="info-chip">📄 PDF Reporting</div>
-        <div class="info-chip">🧾 JSON Export</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-<div class="landing-grid">
-    <div class="landing-card">
-        <div class="landing-icon">🎼</div>
-        <div class="landing-title">Smart Instrument Detection</div>
-        <div class="landing-text">
-            Upload an audio file and let the trained CNN model identify the most probable musical instrument
-            based on spectrogram-driven feature analysis.
-        </div>
-    </div>
-    <div class="landing-card">
-        <div class="landing-icon">📉</div>
-        <div class="landing-title">Clear Audio Insights</div>
-        <div class="landing-text">
-            View waveform plots, prediction confidence levels, and intensity information in a clean,
-            structured interface built for technical demos and project presentations.
-        </div>
-    </div>
-    <div class="landing-card">
-        <div class="landing-icon">📦</div>
-        <div class="landing-title">Report & Export Ready</div>
-        <div class="landing-text">
-            Export predictions as JSON and generate a professional PDF report for documentation,
-            review, submission, or portfolio showcasing.
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# =========================================================
-# SIDEBAR
-# =========================================================
-st.sidebar.markdown("## ⚙️ Hyperparameter Tuning")
-st.sidebar.markdown("Fine-tune preprocessing parameters for spectrogram generation.")
-
-n_fft = st.sidebar.slider("FFT Size", 512, 4096, 2048, step=512)
-hop_length = st.sidebar.slider("Hop Length", 128, 1024, 256, step=128)
-n_mels = st.sidebar.slider("Mel Bands", 64, 256, 128, step=32)
-
-colormap = st.sidebar.selectbox(
-    "Spectrogram Color",
-    ["magma", "viridis", "plasma"]
-)
-
-threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.5)
 
 # ---------------- LABELS ----------------
 label_map = {
@@ -380,6 +415,7 @@ MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
 MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
+
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
@@ -387,10 +423,11 @@ def load_model():
         gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
 
+
 model = load_model()
 
 # ---------------- AUDIO → SPECTROGRAM ----------------
-def audio_to_spectrogram(audio_path):
+def audio_to_spectrogram(audio_path, n_mels, n_fft, hop_length, colormap):
     y, sr = librosa.load(audio_path, mono=True)
 
     mel = librosa.feature.melspectrogram(
@@ -415,7 +452,7 @@ def audio_to_spectrogram(audio_path):
 
     return np.expand_dims(img, axis=0)
 
-# ---------------- WAVEFORM ----------------
+
 def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
@@ -428,7 +465,7 @@ def create_waveform_image(audio_path):
 
     return "waveform.png"
 
-# ---------------- CONFIDENCE GRAPH ----------------
+
 def create_confidence_graph(scores):
     names = list(scores.keys())
     values = list(scores.values())
@@ -443,7 +480,7 @@ def create_confidence_graph(scores):
 
     return "confidence.png"
 
-# ---------------- INTENSITY ----------------
+
 def generate_intensity_text(scores):
     text = "Instrument Intensity:\n"
     for inst, val in scores.items():
@@ -451,7 +488,7 @@ def generate_intensity_text(scores):
         text += f"{inst}: {bars}\n"
     return text
 
-# ---------------- PDF ----------------
+
 def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     pdf_path = "report.pdf"
     doc = SimpleDocTemplate(pdf_path, pagesize=letter)
@@ -460,11 +497,9 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
 
     elements.append(Paragraph("InstruNet AI Report", styles["Title"]))
     elements.append(Spacer(1, 15))
-
     elements.append(Paragraph(f"Audio File: {result['audio_file']}", styles["Normal"]))
     elements.append(Paragraph(f"Detected Instrument: {result['detected_instrument']}", styles["Normal"]))
     elements.append(Paragraph(f"Confidence: {result['confidence']:.2f}", styles["Normal"]))
-
     elements.append(Spacer(1, 10))
     elements.append(Preformatted(intensity_text, styles["Code"]))
 
@@ -477,184 +512,392 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     doc.build(elements)
     return pdf_path
 
-# ---------------- UPLOAD SECTION ----------------
-st.markdown('<div class="section-card">', unsafe_allow_html=True)
-st.markdown('<div class="section-title">Upload Audio File</div>', unsafe_allow_html=True)
-st.markdown('<div class="upload-box">', unsafe_allow_html=True)
 
-uploaded_file = st.file_uploader("Upload Audio (.wav or .mp3)", type=["wav", "mp3"])
-
-st.markdown(
-    '<div class="small-note">Supported formats: WAV, MP3</div>',
-    unsafe_allow_html=True
-)
-
-st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
-
-# ---------------- PROCESS ----------------
-if uploaded_file is not None:
-    with open("input_audio.wav", "wb") as f:
-        f.write(uploaded_file.read())
-
-    col_a, col_b = st.columns([1.4, 1])
-
-    with col_a:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Uploaded Audio</div>', unsafe_allow_html=True)
-        st.audio("input_audio.wav")
-        st.markdown(f"<div class='small-note'>File name: {uploaded_file.name}</div>", unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with col_b:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Model Status</div>', unsafe_allow_html=True)
-        st.success("Model loaded successfully")
-        st.markdown(f"**FFT Size:** {n_fft}")
-        st.markdown(f"**Hop Length:** {hop_length}")
-        st.markdown(f"**Mel Bands:** {n_mels}")
-        st.markdown(f"**Threshold:** {threshold:.2f}")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with st.spinner("Analyzing audio and generating prediction..."):
-        X_test = audio_to_spectrogram("input_audio.wav")
-        pred = model.predict(X_test)[0]
-
-    idx = np.argmax(pred)
-    detected_name, icon = label_map[labels[idx]]
-    confidence = float(np.max(pred))
-
-    if confidence < threshold:
-        detected_name = "Uncertain"
-        icon = "⚠️"
-
-    waveform_path = create_waveform_image("input_audio.wav")
-
-    chart_data = {
-        label_map[labels[i]][0]: float(pred[i])
-        for i in range(len(pred))
-    }
-
-    confidence_path = create_confidence_graph(chart_data)
-    intensity_text = generate_intensity_text(chart_data)
-
-    # ---------------- RESULT SUMMARY ----------------
+# ---------------- LANDING PAGE ----------------
+def show_landing_page():
     st.markdown("""
-    <div class="section-card">
-        <div class="section-title">Prediction Summary</div>
+    <div class="hero-card">
+        <div class="hero-badge">AI-Powered Musical Instrument Recognition</div>
+        <div class="hero-title">InstruNet AI — Professional Audio Classification Dashboard</div>
+        <p class="hero-subtitle">
+            A modern deep learning application that identifies musical instruments from uploaded audio,
+            visualizes waveform patterns, analyzes confidence distribution, and generates exportable reports.
+            Create an account or sign in to access the analysis dashboard.
+        </p>
+        <div class="info-chip-wrap">
+            <div class="info-chip">🎵 Audio Classification</div>
+            <div class="info-chip">📊 Confidence Analysis</div>
+            <div class="info-chip">📈 Waveform Visualization</div>
+            <div class="info-chip">📄 PDF Reporting</div>
+            <div class="info-chip">🔐 Secure Access</div>
+        </div>
+    </div>
     """, unsafe_allow_html=True)
 
-    c1, c2, c3 = st.columns(3)
-
-    with c1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-value">{icon}</div>
-            <div class="metric-label">Detected Class</div>
+    st.markdown("""
+    <div class="landing-grid">
+        <div class="landing-card">
+            <div class="landing-icon">🎼</div>
+            <div class="landing-title">Smart Instrument Detection</div>
+            <div class="landing-text">
+                Upload an audio file and let the trained CNN model identify the most probable musical instrument
+                using spectrogram-based feature extraction.
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-
-    with c2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-value">{detected_name}</div>
-            <div class="metric-label">Instrument</div>
+        <div class="landing-card">
+            <div class="landing-icon">📉</div>
+            <div class="landing-title">Clear Audio Insights</div>
+            <div class="landing-text">
+                View waveform plots, confidence scores, and intensity information in a polished interface
+                suitable for demonstrations and project presentations.
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-
-    with c3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-value">{confidence:.2f}</div>
-            <div class="metric-label">Confidence</div>
+        <div class="landing-card">
+            <div class="landing-icon">📦</div>
+            <div class="landing-title">Report & Export Ready</div>
+            <div class="landing-text">
+                Export prediction results as JSON and generate a PDF report for documentation,
+                review, submission, or portfolio showcasing.
+            </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col1:
+        if st.button("🏠 Home"):
+            st.session_state.auth_mode = "landing"
+
+    with col2:
+        if st.button("📝 Register"):
+            st.session_state.auth_mode = "register"
+
+    with col3:
+        if st.button("🔐 Sign In"):
+            st.session_state.auth_mode = "login"
+
+    st.markdown("""
+    <div class="footer">
+        <div class="footer-title">InstruNet AI</div>
+        <div>
+            A professional deep learning project for automatic musical instrument detection using audio signal analysis,
+            spectrogram-based preprocessing, and CNN-powered classification.
+        </div>
+        <div class="footer-sub">
+            Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
+# ---------------- REGISTER PAGE ----------------
+def show_register_page():
+    st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-title">Create Account</div>', unsafe_allow_html=True)
+    st.markdown('<div class="auth-subtitle">Register to access the InstruNet AI dashboard</div>', unsafe_allow_html=True)
+
+    with st.form("register_form"):
+        full_name = st.text_input("Full Name")
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        confirm_password = st.text_input("Confirm Password", type="password")
+        submitted = st.form_submit_button("Register")
+
+        if submitted:
+            if not full_name.strip():
+                st.error("Full name is required.")
+            elif not email.strip():
+                st.error("Email is required.")
+            elif not password:
+                st.error("Password is required.")
+            elif len(password) < 6:
+                st.error("Password must be at least 6 characters.")
+            elif password != confirm_password:
+                st.error("Passwords do not match.")
+            else:
+                success, message = register_user(full_name.strip(), email.strip(), password)
+                if success:
+                    st.success(message)
+                    st.session_state.auth_mode = "login"
+                    st.rerun()
+                else:
+                    st.error(message)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("← Back to Home", key="back_home_from_register"):
+            st.session_state.auth_mode = "landing"
+            st.rerun()
+    with col2:
+        if st.button("Already have an account? Sign In", key="go_login_from_register"):
+            st.session_state.auth_mode = "login"
+            st.rerun()
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
+
+
+# ---------------- LOGIN PAGE ----------------
+def show_login_page():
+    st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
+    st.markdown('<div class="auth-title">Sign In</div>', unsafe_allow_html=True)
+    st.markdown('<div class="auth-subtitle">Login to continue to the InstruNet AI dashboard</div>', unsafe_allow_html=True)
+
+    with st.form("login_form"):
+        email = st.text_input("Email")
+        password = st.text_input("Password", type="password")
+        submitted = st.form_submit_button("Sign In")
+
+        if submitted:
+            if not email.strip():
+                st.error("Email is required.")
+            elif not password:
+                st.error("Password is required.")
+            else:
+                success, result = login_user(email.strip(), password)
+                if success:
+                    st.session_state.logged_in = True
+                    st.session_state.user = result
+                    st.success("Login successful.")
+                    st.rerun()
+                else:
+                    st.error(result)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("← Back to Home", key="back_home_from_login"):
+            st.session_state.auth_mode = "landing"
+            st.rerun()
+    with col2:
+        if st.button("Create New Account", key="go_register_from_login"):
+            st.session_state.auth_mode = "register"
+            st.rerun()
+
+    st.markdown('</div></div>', unsafe_allow_html=True)
+
+
+# ---------------- MAIN APP ----------------
+def show_main_app():
+    st.sidebar.markdown("## ⚙️ Hyperparameter Tuning")
+    st.sidebar.markdown("Fine-tune preprocessing parameters for spectrogram generation.")
+
+    n_fft = st.sidebar.slider("FFT Size", 512, 4096, 2048, step=512)
+    hop_length = st.sidebar.slider("Hop Length", 128, 1024, 256, step=128)
+    n_mels = st.sidebar.slider("Mel Bands", 64, 256, 128, step=32)
+
+    colormap = st.sidebar.selectbox(
+        "Spectrogram Color",
+        ["magma", "viridis", "plasma"]
+    )
+
+    threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.5)
+
+    st.sidebar.markdown("---")
+    st.sidebar.success(f"Logged in as {st.session_state.user['full_name']}")
+
+    if st.sidebar.button("Logout"):
+        st.session_state.logged_in = False
+        st.session_state.user = None
+        st.session_state.auth_mode = "landing"
+        st.rerun()
 
     st.markdown(f"""
-        <div class="result-banner">
-            <div class="result-main">{icon} {detected_name}</div>
-            <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
+    <div class="hero-card">
+        <div class="hero-badge">Welcome, {st.session_state.user['full_name']}</div>
+        <div class="hero-title">InstruNet AI Dashboard</div>
+        <p class="hero-subtitle">
+            Upload an audio file to detect the musical instrument, inspect waveform and confidence output,
+            and download the generated reports.
+        </p>
+        <div class="info-chip-wrap">
+            <div class="info-chip">🎵 Audio Classification</div>
+            <div class="info-chip">📊 Confidence Analysis</div>
+            <div class="info-chip">📈 Waveform Visualization</div>
+            <div class="info-chip">📄 PDF Reporting</div>
+            <div class="info-chip">👤 {st.session_state.user['email']}</div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ---------------- VISUALIZATION ----------------
-    left_col, right_col = st.columns([1.15, 1])
-
-    with left_col:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Audio Visualization</div>', unsafe_allow_html=True)
-        st.image(waveform_path, use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    with right_col:
-        st.markdown('<div class="section-card">', unsafe_allow_html=True)
-        st.markdown('<div class="section-title">Confidence Distribution</div>', unsafe_allow_html=True)
-        st.bar_chart(chart_data)
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # ---------------- INTENSITY ----------------
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Instrument Intensity</div>', unsafe_allow_html=True)
-    st.code(intensity_text)
+    st.markdown('<div class="section-title">Upload Audio File</div>', unsafe_allow_html=True)
+    st.markdown('<div class="upload-box">', unsafe_allow_html=True)
+
+    uploaded_file = st.file_uploader("Upload Audio (.wav or .mp3)", type=["wav", "mp3"])
+    st.markdown('<div class="small-note">Supported formats: WAV, MP3</div>', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # ---------------- EXPORTS ----------------
-    result = {
-        "audio_file": uploaded_file.name,
-        "detected_instrument": detected_name,
-        "confidence": confidence,
-        "scores": chart_data
-    }
+    if uploaded_file is not None:
+        with open("input_audio.wav", "wb") as f:
+            f.write(uploaded_file.read())
 
-    pdf_path = generate_pdf(result, waveform_path, confidence_path, intensity_text)
+        col_a, col_b = st.columns([1.4, 1])
 
-    st.markdown('<div class="section-card">', unsafe_allow_html=True)
-    st.markdown('<div class="section-title">Download Results</div>', unsafe_allow_html=True)
+        with col_a:
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Uploaded Audio</div>', unsafe_allow_html=True)
+            st.audio("input_audio.wav")
+            st.markdown(f"<div class='small-note'>File name: {uploaded_file.name}</div>", unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    dl1, dl2 = st.columns(2)
+        with col_b:
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Model Status</div>', unsafe_allow_html=True)
+            st.success("Model loaded successfully")
+            st.markdown(f"**FFT Size:** {n_fft}")
+            st.markdown(f"**Hop Length:** {hop_length}")
+            st.markdown(f"**Mel Bands:** {n_mels}")
+            st.markdown(f"**Threshold:** {threshold:.2f}")
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    with dl1:
-        st.download_button(
-            "⬇ Download JSON",
-            json.dumps(result, indent=4),
-            file_name="instrument_result.json",
-            mime="application/json"
-        )
+        with st.spinner("Analyzing audio and generating prediction..."):
+            X_test = audio_to_spectrogram("input_audio.wav", n_mels, n_fft, hop_length, colormap)
+            pred = model.predict(X_test)[0]
 
-    with dl2:
-        with open(pdf_path, "rb") as f:
+        idx = np.argmax(pred)
+        detected_name, icon = label_map[labels[idx]]
+        confidence = float(np.max(pred))
+
+        if confidence < threshold:
+            detected_name = "Uncertain"
+            icon = "⚠️"
+
+        waveform_path = create_waveform_image("input_audio.wav")
+
+        chart_data = {
+            label_map[labels[i]][0]: float(pred[i])
+            for i in range(len(pred))
+        }
+
+        confidence_path = create_confidence_graph(chart_data)
+        intensity_text = generate_intensity_text(chart_data)
+
+        st.markdown("""
+        <div class="section-card">
+            <div class="section-title">Prediction Summary</div>
+        """, unsafe_allow_html=True)
+
+        c1, c2, c3 = st.columns(3)
+
+        with c1:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{icon}</div>
+                <div class="metric-label">Detected Class</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with c2:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{detected_name}</div>
+                <div class="metric-label">Instrument</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        with c3:
+            st.markdown(f"""
+            <div class="metric-card">
+                <div class="metric-value">{confidence:.2f}</div>
+                <div class="metric-label">Confidence</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        st.markdown(f"""
+            <div class="result-banner">
+                <div class="result-main">{icon} {detected_name}</div>
+                <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        left_col, right_col = st.columns([1.15, 1])
+
+        with left_col:
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Audio Visualization</div>', unsafe_allow_html=True)
+            st.image(waveform_path, use_container_width=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        with right_col:
+            st.markdown('<div class="section-card">', unsafe_allow_html=True)
+            st.markdown('<div class="section-title">Confidence Distribution</div>', unsafe_allow_html=True)
+            st.bar_chart(chart_data)
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Instrument Intensity</div>', unsafe_allow_html=True)
+        st.code(intensity_text)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        result = {
+            "audio_file": uploaded_file.name,
+            "detected_instrument": detected_name,
+            "confidence": confidence,
+            "scores": chart_data
+        }
+
+        pdf_path = generate_pdf(result, waveform_path, confidence_path, intensity_text)
+
+        st.markdown('<div class="section-card">', unsafe_allow_html=True)
+        st.markdown('<div class="section-title">Download Results</div>', unsafe_allow_html=True)
+
+        dl1, dl2 = st.columns(2)
+
+        with dl1:
             st.download_button(
-                "⬇ Download PDF",
-                f,
-                file_name="instrument_report.pdf",
-                mime="application/pdf"
+                "⬇ Download JSON",
+                json.dumps(result, indent=4),
+                file_name="instrument_result.json",
+                mime="application/json"
             )
 
-    st.markdown('</div>', unsafe_allow_html=True)
+        with dl2:
+            with open(pdf_path, "rb") as f:
+                st.download_button(
+                    "⬇ Download PDF",
+                    f,
+                    file_name="instrument_report.pdf",
+                    mime="application/pdf"
+                )
 
-else:
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    else:
+        st.markdown("""
+        <div class="section-card">
+            <div class="section-title">Getting Started</div>
+            <p style="color:#cbd5e1; margin-bottom:0; line-height:1.8;">
+                Upload an audio file to begin analysis. The system will preprocess the signal, convert it into a mel spectrogram,
+                run prediction through the trained model, and present the detected instrument with confidence metrics,
+                waveform visualization, and downloadable outputs.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+
     st.markdown("""
-    <div class="section-card">
-        <div class="section-title">Getting Started</div>
-        <p style="color:#cbd5e1; margin-bottom:0; line-height:1.8;">
-            Upload an audio file to begin analysis. The system will preprocess the signal, convert it into a mel spectrogram,
-            run prediction through the trained model, and present the detected instrument with confidence metrics,
-            waveform visualization, and downloadable outputs.
-        </p>
+    <div class="footer">
+        <div class="footer-title">InstruNet AI</div>
+        <div>
+            A professional deep learning project for automatic musical instrument detection using audio signal analysis,
+            spectrogram-based preprocessing, and CNN-powered classification.
+        </div>
+        <div class="footer-sub">
+            Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ---------------- FOOTER ----------------
-st.markdown("""
-<div class="footer">
-    <div class="footer-title">InstruNet AI</div>
-    <div>
-        A professional deep learning project for automatic musical instrument detection using audio signal analysis,
-        spectrogram-based preprocessing, and CNN-powered classification.
-    </div>
-    <div class="footer-sub">
-        Built with Streamlit, TensorFlow, Librosa, Matplotlib, and ReportLab
-    </div>
-</div>
-""", unsafe_allow_html=True)
+
+# ---------------- APP ROUTING ----------------
+if st.session_state.logged_in:
+    show_main_app()
+else:
+    if st.session_state.auth_mode == "register":
+        show_register_page()
+    elif st.session_state.auth_mode == "login":
+        show_login_page()
+    else:
+        show_landing_page()
