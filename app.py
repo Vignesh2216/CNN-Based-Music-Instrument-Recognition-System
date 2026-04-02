@@ -11,7 +11,6 @@ import gdown
 import sqlite3
 import hashlib
 from datetime import datetime
-from textwrap import dedent
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
 from reportlab.lib.pagesizes import letter
@@ -25,12 +24,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ---------------- HTML RENDER HELPER ----------------
-def render_html(html: str):
-    st.markdown(dedent(html).strip(), unsafe_allow_html=True)
-
 # ---------------- DATABASE ----------------
 DB_PATH = "users.db"
+
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
@@ -47,8 +43,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
+
 
 def register_user(full_name, email, password):
     try:
@@ -65,6 +63,7 @@ def register_user(full_name, email, password):
         return False, "An account with this email already exists."
     except Exception as e:
         return False, f"Registration failed: {e}"
+
 
 def login_user(email, password):
     try:
@@ -87,6 +86,7 @@ def login_user(email, password):
     except Exception as e:
         return False, f"Login failed: {e}"
 
+
 init_db()
 
 # ---------------- SESSION STATE ----------------
@@ -100,7 +100,7 @@ if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "landing"
 
 # ---------------- CUSTOM CSS ----------------
-render_html("""
+st.markdown("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #081120 0%, #0f172a 45%, #111827 100%);
@@ -132,7 +132,7 @@ render_html("""
         background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(99,102,241,0.13), rgba(14,165,233,0.12));
         border: 1px solid rgba(255,255,255,0.10);
         border-radius: 28px;
-        padding: 48px 42px 34px 42px;
+        padding: 42px 38px;
         backdrop-filter: blur(14px);
         box-shadow: 0 14px 40px rgba(0,0,0,0.28);
         margin-bottom: 22px;
@@ -176,37 +176,6 @@ render_html("""
         color: #dbeafe;
         max-width: 820px;
         line-height: 1.7;
-        margin-bottom: 0;
-    }
-
-    .landing-actions {
-        display: flex;
-        gap: 18px;
-        margin-top: 26px;
-        flex-wrap: wrap;
-    }
-
-    .landing-action-card {
-        flex: 1;
-        min-width: 240px;
-        background: rgba(255,255,255,0.07);
-        border: 1px solid rgba(255,255,255,0.10);
-        border-radius: 20px;
-        padding: 20px;
-        backdrop-filter: blur(10px);
-    }
-
-    .landing-action-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin-bottom: 6px;
-    }
-
-    .landing-action-text {
-        color: #cbd5e1;
-        font-size: 0.94rem;
-        line-height: 1.6;
         margin-bottom: 0;
     }
 
@@ -359,7 +328,7 @@ render_html("""
     }
 
     .auth-wrapper {
-        max-width: 500px;
+        max-width: 460px;
         margin: 30px auto;
     }
 
@@ -367,7 +336,7 @@ render_html("""
         background: rgba(255,255,255,0.06);
         border: 1px solid rgba(255,255,255,0.10);
         border-radius: 24px;
-        padding: 30px;
+        padding: 28px;
         box-shadow: 0 12px 32px rgba(0,0,0,0.22);
     }
 
@@ -426,13 +395,9 @@ render_html("""
         .hero-title {
             font-size: 2.2rem;
         }
-
-        .landing-actions {
-            flex-direction: column;
-        }
     }
 </style>
-""")
+""", unsafe_allow_html=True)
 
 # ---------------- LABELS ----------------
 label_map = {
@@ -450,12 +415,14 @@ MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
 MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
+
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
         os.makedirs(MODEL_DIR, exist_ok=True)
         gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
+
 
 model = load_model()
 
@@ -485,6 +452,7 @@ def audio_to_spectrogram(audio_path, n_mels, n_fft, hop_length, colormap):
 
     return np.expand_dims(img, axis=0)
 
+
 def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
@@ -496,6 +464,7 @@ def create_waveform_image(audio_path):
     plt.close()
 
     return "waveform.png"
+
 
 def create_confidence_graph(scores):
     names = list(scores.keys())
@@ -511,12 +480,14 @@ def create_confidence_graph(scores):
 
     return "confidence.png"
 
+
 def generate_intensity_text(scores):
     text = "Instrument Intensity:\n"
     for inst, val in scores.items():
         bars = "|" * int(val * 20)
         text += f"{inst}: {bars}\n"
     return text
+
 
 def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     pdf_path = "report.pdf"
@@ -541,9 +512,10 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     doc.build(elements)
     return pdf_path
 
+
 # ---------------- LANDING PAGE ----------------
 def show_landing_page():
-    render_html("""
+    st.markdown("""
     <div class="hero-card">
         <div class="hero-badge">AI-Powered Musical Instrument Recognition</div>
         <div class="hero-title">InstruNet AI — Professional Audio Classification Dashboard</div>
@@ -552,23 +524,6 @@ def show_landing_page():
             visualizes waveform patterns, analyzes confidence distribution, and generates exportable reports.
             Create an account or sign in to access the analysis dashboard.
         </p>
-
-        <div class="landing-actions">
-            <div class="landing-action-card">
-                <div class="landing-action-title">Create New Account</div>
-                <div class="landing-action-text">
-                    Register to access the full instrument detection dashboard and reports.
-                </div>
-            </div>
-
-            <div class="landing-action-card">
-                <div class="landing-action-title">Already a User?</div>
-                <div class="landing-action-text">
-                    Sign in and continue directly to the main analysis page.
-                </div>
-            </div>
-        </div>
-
         <div class="info-chip-wrap">
             <div class="info-chip">🎵 Audio Classification</div>
             <div class="info-chip">📊 Confidence Analysis</div>
@@ -577,23 +532,9 @@ def show_landing_page():
             <div class="info-chip">🔐 Secure Access</div>
         </div>
     </div>
-    """)
+    """, unsafe_allow_html=True)
 
-    btn1, btn2, _ = st.columns([1, 1, 2])
-
-    with btn1:
-        if st.button("📝 Register", use_container_width=True):
-            st.session_state.auth_mode = "register"
-            st.rerun()
-
-    with btn2:
-        if st.button("🔐 Sign In", use_container_width=True):
-            st.session_state.auth_mode = "login"
-            st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    render_html("""
+    st.markdown("""
     <div class="landing-grid">
         <div class="landing-card">
             <div class="landing-icon">🎼</div>
@@ -603,7 +544,6 @@ def show_landing_page():
                 using spectrogram-based feature extraction.
             </div>
         </div>
-
         <div class="landing-card">
             <div class="landing-icon">📉</div>
             <div class="landing-title">Clear Audio Insights</div>
@@ -612,7 +552,6 @@ def show_landing_page():
                 suitable for demonstrations and project presentations.
             </div>
         </div>
-
         <div class="landing-card">
             <div class="landing-icon">📦</div>
             <div class="landing-title">Report & Export Ready</div>
@@ -622,9 +561,23 @@ def show_landing_page():
             </div>
         </div>
     </div>
-    """)
+    """, unsafe_allow_html=True)
 
-    render_html("""
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col1:
+        if st.button("🏠 Home"):
+            st.session_state.auth_mode = "landing"
+
+    with col2:
+        if st.button("📝 Register"):
+            st.session_state.auth_mode = "register"
+
+    with col3:
+        if st.button("🔐 Sign In"):
+            st.session_state.auth_mode = "login"
+
+    st.markdown("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -635,7 +588,8 @@ def show_landing_page():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """)
+    """, unsafe_allow_html=True)
+
 
 # ---------------- REGISTER PAGE ----------------
 def show_register_page():
@@ -672,7 +626,7 @@ def show_register_page():
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("← Back", key="back_home_from_register"):
+        if st.button("← Back to Home", key="back_home_from_register"):
             st.session_state.auth_mode = "landing"
             st.rerun()
     with col2:
@@ -681,6 +635,7 @@ def show_register_page():
             st.rerun()
 
     st.markdown('</div></div>', unsafe_allow_html=True)
+
 
 # ---------------- LOGIN PAGE ----------------
 def show_login_page():
@@ -710,7 +665,7 @@ def show_login_page():
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("← Back", key="back_home_from_login"):
+        if st.button("← Back to Home", key="back_home_from_login"):
             st.session_state.auth_mode = "landing"
             st.rerun()
     with col2:
@@ -719,6 +674,7 @@ def show_login_page():
             st.rerun()
 
     st.markdown('</div></div>', unsafe_allow_html=True)
+
 
 # ---------------- MAIN APP ----------------
 def show_main_app():
@@ -745,7 +701,7 @@ def show_main_app():
         st.session_state.auth_mode = "landing"
         st.rerun()
 
-    render_html(f"""
+    st.markdown(f"""
     <div class="hero-card">
         <div class="hero-badge">Welcome, {st.session_state.user['full_name']}</div>
         <div class="hero-title">InstruNet AI Dashboard</div>
@@ -761,7 +717,7 @@ def show_main_app():
             <div class="info-chip">👤 {st.session_state.user['email']}</div>
         </div>
     </div>
-    """)
+    """, unsafe_allow_html=True)
 
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Upload Audio File</div>', unsafe_allow_html=True)
@@ -819,43 +775,43 @@ def show_main_app():
         intensity_text = generate_intensity_text(chart_data)
 
         st.markdown("""
-<div class="section-card">
-    <div class="section-title">Prediction Summary</div>
-""", unsafe_allow_html=True)
+        <div class="section-card">
+            <div class="section-title">Prediction Summary</div>
+        """, unsafe_allow_html=True)
 
         c1, c2, c3 = st.columns(3)
 
         with c1:
             st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-value">{icon}</div>
-    <div class="metric-label">Detected Class</div>
-</div>
-""", unsafe_allow_html=True)
+            <div class="metric-card">
+                <div class="metric-value">{icon}</div>
+                <div class="metric-label">Detected Class</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with c2:
             st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-value">{detected_name}</div>
-    <div class="metric-label">Instrument</div>
-</div>
-""", unsafe_allow_html=True)
+            <div class="metric-card">
+                <div class="metric-value">{detected_name}</div>
+                <div class="metric-label">Instrument</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with c3:
             st.markdown(f"""
-<div class="metric-card">
-    <div class="metric-value">{confidence:.2f}</div>
-    <div class="metric-label">Confidence</div>
-</div>
-""", unsafe_allow_html=True)
+            <div class="metric-card">
+                <div class="metric-value">{confidence:.2f}</div>
+                <div class="metric-label">Confidence</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         st.markdown(f"""
-<div class="result-banner">
-    <div class="result-main">{icon} {detected_name}</div>
-    <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
-</div>
-</div>
-""", unsafe_allow_html=True)
+            <div class="result-banner">
+                <div class="result-main">{icon} {detected_name}</div>
+                <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
         left_col, right_col = st.columns([1.15, 1])
 
@@ -873,7 +829,7 @@ def show_main_app():
 
         st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">Instrument Intensity</div>', unsafe_allow_html=True)
-        st.text(intensity_text)
+        st.code(intensity_text)
         st.markdown('</div>', unsafe_allow_html=True)
 
         result = {
@@ -910,7 +866,7 @@ def show_main_app():
         st.markdown('</div>', unsafe_allow_html=True)
 
     else:
-        render_html("""
+        st.markdown("""
         <div class="section-card">
             <div class="section-title">Getting Started</div>
             <p style="color:#cbd5e1; margin-bottom:0; line-height:1.8;">
@@ -919,9 +875,9 @@ def show_main_app():
                 waveform visualization, and downloadable outputs.
             </p>
         </div>
-        """)
+        """, unsafe_allow_html=True)
 
-    render_html("""
+    st.markdown("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -932,7 +888,8 @@ def show_main_app():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """)
+    """, unsafe_allow_html=True)
+
 
 # ---------------- APP ROUTING ----------------
 if st.session_state.logged_in:
