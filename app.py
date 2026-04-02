@@ -132,7 +132,7 @@ st.markdown("""
         background: linear-gradient(135deg, rgba(37,99,235,0.16), rgba(99,102,241,0.13), rgba(14,165,233,0.12));
         border: 1px solid rgba(255,255,255,0.10);
         border-radius: 28px;
-        padding: 42px 38px;
+        padding: 48px 42px 34px 42px;
         backdrop-filter: blur(14px);
         box-shadow: 0 14px 40px rgba(0,0,0,0.28);
         margin-bottom: 22px;
@@ -177,6 +177,37 @@ st.markdown("""
         max-width: 820px;
         line-height: 1.7;
         margin-bottom: 0;
+    }
+
+    .landing-actions {
+        display: flex;
+        gap: 18px;
+        margin-top: 26px;
+        flex-wrap: wrap;
+    }
+
+    .landing-action-card {
+        flex: 1;
+        min-width: 240px;
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 20px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+    }
+
+    .landing-action-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 6px;
+    }
+
+    .landing-action-text {
+        color: #cbd5e1;
+        font-size: 0.94rem;
+        line-height: 1.6;
+        margin-bottom: 14px;
     }
 
     .info-chip-wrap {
@@ -328,7 +359,7 @@ st.markdown("""
     }
 
     .auth-wrapper {
-        max-width: 460px;
+        max-width: 500px;
         margin: 30px auto;
     }
 
@@ -336,7 +367,7 @@ st.markdown("""
         background: rgba(255,255,255,0.06);
         border: 1px solid rgba(255,255,255,0.10);
         border-radius: 24px;
-        padding: 28px;
+        padding: 30px;
         box-shadow: 0 12px 32px rgba(0,0,0,0.22);
     }
 
@@ -394,6 +425,10 @@ st.markdown("""
 
         .hero-title {
             font-size: 2.2rem;
+        }
+
+        .landing-actions {
+            flex-direction: column;
         }
     }
 </style>
@@ -524,6 +559,22 @@ def show_landing_page():
             visualizes waveform patterns, analyzes confidence distribution, and generates exportable reports.
             Create an account or sign in to access the analysis dashboard.
         </p>
+
+        <div class="landing-actions">
+            <div class="landing-action-card">
+                <div class="landing-action-title">Create New Account</div>
+                <div class="landing-action-text">
+                    Register to access the full instrument detection dashboard and reports.
+                </div>
+            </div>
+            <div class="landing-action-card">
+                <div class="landing-action-title">Already a User?</div>
+                <div class="landing-action-text">
+                    Sign in and continue directly to the main analysis page.
+                </div>
+            </div>
+        </div>
+
         <div class="info-chip-wrap">
             <div class="info-chip">🎵 Audio Classification</div>
             <div class="info-chip">📊 Confidence Analysis</div>
@@ -533,6 +584,20 @@ def show_landing_page():
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    btn1, btn2, _ = st.columns([1, 1, 2])
+
+    with btn1:
+        if st.button("📝 Register", use_container_width=True):
+            st.session_state.auth_mode = "register"
+            st.rerun()
+
+    with btn2:
+        if st.button("🔐 Sign In", use_container_width=True):
+            st.session_state.auth_mode = "login"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class="landing-grid">
@@ -562,20 +627,6 @@ def show_landing_page():
         </div>
     </div>
     """, unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 1, 1])
-
-    with col1:
-        if st.button("🏠 Home"):
-            st.session_state.auth_mode = "landing"
-
-    with col2:
-        if st.button("📝 Register"):
-            st.session_state.auth_mode = "register"
-
-    with col3:
-        if st.button("🔐 Sign In"):
-            st.session_state.auth_mode = "login"
 
     st.markdown("""
     <div class="footer">
@@ -626,7 +677,7 @@ def show_register_page():
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("← Back to Home", key="back_home_from_register"):
+        if st.button("← Back", key="back_home_from_register"):
             st.session_state.auth_mode = "landing"
             st.rerun()
     with col2:
@@ -665,7 +716,7 @@ def show_login_page():
 
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("← Back to Home", key="back_home_from_login"):
+        if st.button("← Back", key="back_home_from_login"):
             st.session_state.auth_mode = "landing"
             st.rerun()
     with col2:
