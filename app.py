@@ -16,15 +16,45 @@ from reportlab.lib.styles import getSampleStyleSheet
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(page_title="InstruNet AI", layout="centered")
 
+# ---------------- CUSTOM UI (BLUE THEME) ----------------
+st.markdown("""
+<style>
+.main-title {
+    font-size: 40px;
+    font-weight: 800;
+    text-align: center;
+    color: #3b82f6;
+}
+.subtitle {
+    text-align: center;
+    color: #9ca3af;
+    margin-bottom: 25px;
+}
+.result-card {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    margin-top: 20px;
+}
+.footer {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 14px;
+    margin-top: 50px;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # ---------------- HEADER ----------------
-st.markdown("<h1 style='text-align:center;'>🎵 InstruNet AI</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center;'>Automatic Musical Instrument Detection</p>", unsafe_allow_html=True)
+st.markdown('<div class="main-title">🎵 InstruNet AI</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Automatic Musical Instrument Detection</div>', unsafe_allow_html=True)
 
-# =========================================================
-# 🔥 SIDEBAR (MUST BE HERE - TOP LEVEL)
-# =========================================================
+# ---------------- SIDEBAR ----------------
 st.sidebar.title("⚙️ Hyperparameter Tuning")
-
 st.sidebar.write("Adjust preprocessing parameters 👇")
 
 n_fft = st.sidebar.slider("FFT Size", 512, 4096, 2048, step=512)
@@ -52,7 +82,7 @@ MODEL_DIR = "model"
 MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
 
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
-MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}")
 
 @st.cache_resource
 def load_model():
@@ -109,7 +139,6 @@ def create_confidence_graph(scores):
 
     plt.figure(figsize=(6, 3))
     plt.bar(names, values)
-    plt.ylabel("Confidence")
     plt.ylim(0, 1)
     plt.tight_layout()
     plt.savefig("confidence.png")
@@ -125,34 +154,8 @@ def generate_intensity_text(scores):
         text += f"{inst}: {bars}\n"
     return text
 
-# ---------------- PDF ----------------
-def generate_pdf(result, waveform_path, confidence_path, intensity_text):
-    pdf_path = "report.pdf"
-    doc = SimpleDocTemplate(pdf_path, pagesize=letter)
-    styles = getSampleStyleSheet()
-    elements = []
-
-    elements.append(Paragraph("InstruNet AI Report", styles["Title"]))
-    elements.append(Spacer(1, 15))
-
-    elements.append(Paragraph(f"Audio File: {result['audio_file']}", styles["Normal"]))
-    elements.append(Paragraph(f"Detected Instrument: {result['detected_instrument']}", styles["Normal"]))
-    elements.append(Paragraph(f"Confidence: {result['confidence']:.2f}", styles["Normal"]))
-
-    elements.append(Spacer(1, 10))
-    elements.append(Preformatted(intensity_text, styles["Code"]))
-
-    if os.path.exists(waveform_path):
-        elements.append(RLImage(waveform_path, width=400, height=150))
-
-    if os.path.exists(confidence_path):
-        elements.append(RLImage(confidence_path, width=400, height=200))
-
-    doc.build(elements)
-    return pdf_path
-
 # ---------------- FILE UPLOAD ----------------
-uploaded_file = st.file_uploader("Upload Audio (.wav or .mp3)", type=["wav", "mp3"])
+uploaded_file = st.file_uploader("🎧 Upload Audio (.wav or .mp3)", type=["wav", "mp3"])
 
 if uploaded_file is not None:
 
@@ -161,7 +164,7 @@ if uploaded_file is not None:
 
     st.audio("input_audio.wav")
 
-    with st.spinner("Analyzing..."):
+    with st.spinner("Analyzing audio..."):
         X_test = audio_to_spectrogram("input_audio.wav")
         pred = model.predict(X_test)[0]
 
@@ -169,7 +172,6 @@ if uploaded_file is not None:
     detected_name, icon = label_map[labels[idx]]
     confidence = float(np.max(pred))
 
-    # 🔥 Threshold logic
     if confidence < threshold:
         detected_name = "Uncertain"
         icon = "⚠️"
@@ -179,16 +181,19 @@ if uploaded_file is not None:
     st.subheader("Audio Visualization")
     st.image(waveform_path)
 
-    st.markdown(f"## {icon} {detected_name} ({confidence:.2f})")
+    # 🔥 RESULT CARD (RESTORED)
+    st.markdown(
+        f'<div class="result-card">{icon} {detected_name} ({confidence:.2f})</div>',
+        unsafe_allow_html=True
+    )
 
     chart_data = {
         label_map[labels[i]][0]: float(pred[i])
         for i in range(len(pred))
     }
 
+    st.subheader("Confidence Scores")
     st.bar_chart(chart_data)
-
-    confidence_path = create_confidence_graph(chart_data)
 
     intensity_text = generate_intensity_text(chart_data)
 
@@ -204,7 +209,8 @@ if uploaded_file is not None:
 
     st.download_button("Download JSON", json.dumps(result, indent=4))
 
-    pdf_path = generate_pdf(result, waveform_path, confidence_path, intensity_text)
-
-    with open(pdf_path, "rb") as f:
-        st.download_button("Download PDF", f)
+# ---------------- FOOTER ----------------
+st.markdown(
+    '<div class="footer">Built with ❤️ using Streamlit | InstruNet AI</div>',
+    unsafe_allow_html=True
+)
