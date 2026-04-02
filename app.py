@@ -25,6 +25,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ---------------- HTML RENDER HELPER ----------------
+def render_html(html: str):
+    st.markdown(dedent(html).strip(), unsafe_allow_html=True)
+
 # ---------------- DATABASE ----------------
 DB_PATH = "users.db"
 
@@ -101,7 +105,7 @@ if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "landing"
 
 # ---------------- CUSTOM CSS ----------------
-st.markdown(dedent("""
+render_html("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #081120 0%, #0f172a 45%, #111827 100%);
@@ -433,7 +437,7 @@ st.markdown(dedent("""
         }
     }
 </style>
-"""), unsafe_allow_html=True)
+""")
 
 # ---------------- LABELS ----------------
 label_map = {
@@ -551,7 +555,7 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
 
 # ---------------- LANDING PAGE ----------------
 def show_landing_page():
-    st.markdown(dedent("""
+    render_html("""
     <div class="hero-card">
         <div class="hero-badge">AI-Powered Musical Instrument Recognition</div>
         <div class="hero-title">InstruNet AI — Professional Audio Classification Dashboard</div>
@@ -584,7 +588,7 @@ def show_landing_page():
             <div class="info-chip">🔐 Secure Access</div>
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """)
 
     btn1, btn2, _ = st.columns([1, 1, 2])
 
@@ -600,7 +604,7 @@ def show_landing_page():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown(dedent("""
+    render_html("""
     <div class="landing-grid">
         <div class="landing-card">
             <div class="landing-icon">🎼</div>
@@ -627,9 +631,9 @@ def show_landing_page():
             </div>
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """)
 
-    st.markdown(dedent("""
+    render_html("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -640,7 +644,7 @@ def show_landing_page():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """)
 
 
 # ---------------- REGISTER PAGE ----------------
@@ -753,7 +757,7 @@ def show_main_app():
         st.session_state.auth_mode = "landing"
         st.rerun()
 
-    st.markdown(dedent(f"""
+    render_html(f"""
     <div class="hero-card">
         <div class="hero-badge">Welcome, {st.session_state.user['full_name']}</div>
         <div class="hero-title">InstruNet AI Dashboard</div>
@@ -769,7 +773,7 @@ def show_main_app():
             <div class="info-chip">👤 {st.session_state.user['email']}</div>
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """)
 
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Upload Audio File</div>', unsafe_allow_html=True)
@@ -827,43 +831,43 @@ def show_main_app():
         intensity_text = generate_intensity_text(chart_data)
 
         st.markdown("""
-        <div class="section-card">
-            <div class="section-title">Prediction Summary</div>
-        """, unsafe_allow_html=True)
+<div class="section-card">
+    <div class="section-title">Prediction Summary</div>
+""", unsafe_allow_html=True)
 
         c1, c2, c3 = st.columns(3)
 
         with c1:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-value">{icon}</div>
-                <div class="metric-label">Detected Class</div>
-            </div>
-            """, unsafe_allow_html=True)
+<div class="metric-card">
+    <div class="metric-value">{icon}</div>
+    <div class="metric-label">Detected Class</div>
+</div>
+""", unsafe_allow_html=True)
 
         with c2:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-value">{detected_name}</div>
-                <div class="metric-label">Instrument</div>
-            </div>
-            """, unsafe_allow_html=True)
+<div class="metric-card">
+    <div class="metric-value">{detected_name}</div>
+    <div class="metric-label">Instrument</div>
+</div>
+""", unsafe_allow_html=True)
 
         with c3:
             st.markdown(f"""
-            <div class="metric-card">
-                <div class="metric-value">{confidence:.2f}</div>
-                <div class="metric-label">Confidence</div>
-            </div>
-            """, unsafe_allow_html=True)
+<div class="metric-card">
+    <div class="metric-value">{confidence:.2f}</div>
+    <div class="metric-label">Confidence</div>
+</div>
+""", unsafe_allow_html=True)
 
         st.markdown(f"""
-            <div class="result-banner">
-                <div class="result-main">{icon} {detected_name}</div>
-                <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+<div class="result-banner">
+    <div class="result-main">{icon} {detected_name}</div>
+    <div class="result-sub">Prediction confidence: {confidence:.2f}</div>
+</div>
+</div>
+""", unsafe_allow_html=True)
 
         left_col, right_col = st.columns([1.15, 1])
 
@@ -918,7 +922,7 @@ def show_main_app():
         st.markdown('</div>', unsafe_allow_html=True)
 
     else:
-        st.markdown(dedent("""
+        render_html("""
         <div class="section-card">
             <div class="section-title">Getting Started</div>
             <p style="color:#cbd5e1; margin-bottom:0; line-height:1.8;">
@@ -927,9 +931,9 @@ def show_main_app():
                 waveform visualization, and downloadable outputs.
             </p>
         </div>
-        """), unsafe_allow_html=True)
+        """)
 
-    st.markdown(dedent("""
+    render_html("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -940,7 +944,7 @@ def show_main_app():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """), unsafe_allow_html=True)
+    """)
 
 
 # ---------------- APP ROUTING ----------------
