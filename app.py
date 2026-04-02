@@ -11,6 +11,7 @@ import gdown
 import sqlite3
 import hashlib
 from datetime import datetime
+from textwrap import dedent
 
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image as RLImage, Preformatted
 from reportlab.lib.pagesizes import letter
@@ -100,7 +101,7 @@ if "auth_mode" not in st.session_state:
     st.session_state.auth_mode = "landing"
 
 # ---------------- CUSTOM CSS ----------------
-st.markdown("""
+st.markdown(dedent("""
 <style>
     .stApp {
         background: linear-gradient(135deg, #081120 0%, #0f172a 45%, #111827 100%);
@@ -432,7 +433,7 @@ st.markdown("""
         }
     }
 </style>
-""", unsafe_allow_html=True)
+"""), unsafe_allow_html=True)
 
 # ---------------- LABELS ----------------
 label_map = {
@@ -550,7 +551,7 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
 
 # ---------------- LANDING PAGE ----------------
 def show_landing_page():
-    st.markdown("""
+    st.markdown(dedent("""
     <div class="hero-card">
         <div class="hero-badge">AI-Powered Musical Instrument Recognition</div>
         <div class="hero-title">InstruNet AI — Professional Audio Classification Dashboard</div>
@@ -583,7 +584,7 @@ def show_landing_page():
             <div class="info-chip">🔐 Secure Access</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
     btn1, btn2, _ = st.columns([1, 1, 2])
 
@@ -599,7 +600,7 @@ def show_landing_page():
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(dedent("""
     <div class="landing-grid">
         <div class="landing-card">
             <div class="landing-icon">🎼</div>
@@ -626,9 +627,9 @@ def show_landing_page():
             </div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(dedent("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -639,7 +640,7 @@ def show_landing_page():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
 
 # ---------------- REGISTER PAGE ----------------
@@ -752,7 +753,7 @@ def show_main_app():
         st.session_state.auth_mode = "landing"
         st.rerun()
 
-    st.markdown(f"""
+    st.markdown(dedent(f"""
     <div class="hero-card">
         <div class="hero-badge">Welcome, {st.session_state.user['full_name']}</div>
         <div class="hero-title">InstruNet AI Dashboard</div>
@@ -768,7 +769,7 @@ def show_main_app():
             <div class="info-chip">👤 {st.session_state.user['email']}</div>
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
     st.markdown('<div class="section-card">', unsafe_allow_html=True)
     st.markdown('<div class="section-title">Upload Audio File</div>', unsafe_allow_html=True)
@@ -917,7 +918,7 @@ def show_main_app():
         st.markdown('</div>', unsafe_allow_html=True)
 
     else:
-        st.markdown("""
+        st.markdown(dedent("""
         <div class="section-card">
             <div class="section-title">Getting Started</div>
             <p style="color:#cbd5e1; margin-bottom:0; line-height:1.8;">
@@ -926,9 +927,9 @@ def show_main_app():
                 waveform visualization, and downloadable outputs.
             </p>
         </div>
-        """, unsafe_allow_html=True)
+        """), unsafe_allow_html=True)
 
-    st.markdown("""
+    st.markdown(dedent("""
     <div class="footer">
         <div class="footer-title">InstruNet AI</div>
         <div>
@@ -939,7 +940,7 @@ def show_main_app():
             Built with Streamlit, TensorFlow, Librosa, Matplotlib, SQLite, and ReportLab
         </div>
     </div>
-    """, unsafe_allow_html=True)
+    """), unsafe_allow_html=True)
 
 
 # ---------------- APP ROUTING ----------------
