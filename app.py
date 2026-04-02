@@ -82,7 +82,7 @@ MODEL_DIR = "model"
 MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
 
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
-MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}")
+MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
 @st.cache_resource
 def load_model():
