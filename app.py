@@ -32,7 +32,6 @@ def render_html(html: str):
 # ---------------- DATABASE ----------------
 DB_PATH = "users.db"
 
-
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -48,10 +47,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
-
 
 def register_user(full_name, email, password):
     try:
@@ -68,7 +65,6 @@ def register_user(full_name, email, password):
         return False, "An account with this email already exists."
     except Exception as e:
         return False, f"Registration failed: {e}"
-
 
 def login_user(email, password):
     try:
@@ -90,7 +86,6 @@ def login_user(email, password):
         return False, "Invalid email or password."
     except Exception as e:
         return False, f"Login failed: {e}"
-
 
 init_db()
 
@@ -212,7 +207,7 @@ render_html("""
         color: #cbd5e1;
         font-size: 0.94rem;
         line-height: 1.6;
-        margin-bottom: 14px;
+        margin-bottom: 0;
     }
 
     .info-chip-wrap {
@@ -455,14 +450,12 @@ MODEL_PATH = os.path.join(MODEL_DIR, "instrunet_cnn.keras")
 FILE_ID = "1qVlfOXIVthbxdYFQfrxsxCSo1sJTMrXb"
 MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
 
-
 @st.cache_resource
 def load_model():
     if not os.path.exists(MODEL_PATH):
         os.makedirs(MODEL_DIR, exist_ok=True)
         gdown.download(MODEL_URL, MODEL_PATH, quiet=True, fuzzy=True)
     return tf.keras.models.load_model(MODEL_PATH, compile=False)
-
 
 model = load_model()
 
@@ -492,7 +485,6 @@ def audio_to_spectrogram(audio_path, n_mels, n_fft, hop_length, colormap):
 
     return np.expand_dims(img, axis=0)
 
-
 def create_waveform_image(audio_path):
     y, sr = librosa.load(audio_path, mono=True)
 
@@ -504,7 +496,6 @@ def create_waveform_image(audio_path):
     plt.close()
 
     return "waveform.png"
-
 
 def create_confidence_graph(scores):
     names = list(scores.keys())
@@ -520,14 +511,12 @@ def create_confidence_graph(scores):
 
     return "confidence.png"
 
-
 def generate_intensity_text(scores):
     text = "Instrument Intensity:\n"
     for inst, val in scores.items():
         bars = "|" * int(val * 20)
         text += f"{inst}: {bars}\n"
     return text
-
 
 def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     pdf_path = "report.pdf"
@@ -552,7 +541,6 @@ def generate_pdf(result, waveform_path, confidence_path, intensity_text):
     doc.build(elements)
     return pdf_path
 
-
 # ---------------- LANDING PAGE ----------------
 def show_landing_page():
     render_html("""
@@ -572,6 +560,7 @@ def show_landing_page():
                     Register to access the full instrument detection dashboard and reports.
                 </div>
             </div>
+
             <div class="landing-action-card">
                 <div class="landing-action-title">Already a User?</div>
                 <div class="landing-action-text">
@@ -614,6 +603,7 @@ def show_landing_page():
                 using spectrogram-based feature extraction.
             </div>
         </div>
+
         <div class="landing-card">
             <div class="landing-icon">📉</div>
             <div class="landing-title">Clear Audio Insights</div>
@@ -622,6 +612,7 @@ def show_landing_page():
                 suitable for demonstrations and project presentations.
             </div>
         </div>
+
         <div class="landing-card">
             <div class="landing-icon">📦</div>
             <div class="landing-title">Report & Export Ready</div>
@@ -645,7 +636,6 @@ def show_landing_page():
         </div>
     </div>
     """)
-
 
 # ---------------- REGISTER PAGE ----------------
 def show_register_page():
@@ -692,7 +682,6 @@ def show_register_page():
 
     st.markdown('</div></div>', unsafe_allow_html=True)
 
-
 # ---------------- LOGIN PAGE ----------------
 def show_login_page():
     st.markdown('<div class="auth-wrapper"><div class="auth-card">', unsafe_allow_html=True)
@@ -730,7 +719,6 @@ def show_login_page():
             st.rerun()
 
     st.markdown('</div></div>', unsafe_allow_html=True)
-
 
 # ---------------- MAIN APP ----------------
 def show_main_app():
@@ -885,7 +873,7 @@ def show_main_app():
 
         st.markdown('<div class="section-card">', unsafe_allow_html=True)
         st.markdown('<div class="section-title">Instrument Intensity</div>', unsafe_allow_html=True)
-        st.code(intensity_text)
+        st.text(intensity_text)
         st.markdown('</div>', unsafe_allow_html=True)
 
         result = {
@@ -945,7 +933,6 @@ def show_main_app():
         </div>
     </div>
     """)
-
 
 # ---------------- APP ROUTING ----------------
 if st.session_state.logged_in:
